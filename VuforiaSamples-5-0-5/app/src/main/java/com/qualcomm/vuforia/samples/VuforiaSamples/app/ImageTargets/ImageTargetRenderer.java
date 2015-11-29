@@ -80,7 +80,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     
     private int texSampler2DHandle;
     
-    private CubeObject mTeapot;
+    private CubeObject mCube;
     
     private float kBuildingScale = 12.0f;
     private SampleApplication3DModel mBuildingsModel;
@@ -183,7 +183,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     // Function for initializing the renderer.
     private void initRendering()
     {
-        mTeapot = new CubeObject();
+        mCube = new CubeObject(10.00f);
         
         mRenderer = Renderer.getInstance();
         
