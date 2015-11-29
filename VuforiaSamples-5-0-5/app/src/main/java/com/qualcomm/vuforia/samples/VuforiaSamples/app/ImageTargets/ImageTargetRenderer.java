@@ -399,13 +399,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                             x = fx * X_camera / Z_camera + cx;
                             y = fy * Y_camera / Z_camera + cy;
 
-                       /* if(i==0)
-                        {
-                            Log.i(LOGTAG,x+","+y);
-                            Log.i(LOGTAG,cx+","+cy);
-                        }*/
-                        //Log.i(LOGTAG,width+","+height);
-
+                      
                             if ((x > 0 && x < width - 20 && y > 0
                                     && y < height - 20) && distance <= 100
                                     //&& isNotIntersected(i, X_camera, Y_camera)
@@ -434,7 +428,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                                 X[i] = X_camera;
                                 Y[i] = Y_camera;
                                 Z[i] = Z_camera;
-3
+
                                 isSticked[i] = true;
                                 hasSticked = true;
                                 interval[i] = 0;
