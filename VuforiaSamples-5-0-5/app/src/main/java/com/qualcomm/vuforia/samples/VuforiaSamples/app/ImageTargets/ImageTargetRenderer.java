@@ -439,6 +439,55 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                         } else interval[i]++;
                     }
                 }
+                float[][] mat=new float[3][3];
+                for(int index_row=0;index_row<=2;index_row++)
+                    for(int index_col=0;index_col<=2;index_col++)
+                    {
+                        mat[index_row][index_col]=modelViewMatrix[index_col*4+index_row];
+                    }
+/*
+                mat[0][0] = 0.8898077712f;
+                mat[0][1] = -0.0332875157f;
+                mat[0][2] = -0.4551198431f;
+
+                mat[1][0] = 0.0816309549f;
+                mat[1][1] = 0.9928600026f;
+                mat[1][2] = 0.0869793214f;
+
+                mat[2][0] = 0.4489749631f;
+                mat[2][1] = -0.1145467435f;
+                mat[2][2] = 0.8861718378f;
+*/
+                double[] Quat=new double[4];
+                Quat = Mat2Quat(mat);
+
+                double q0 = Quat[0];
+                double q1=Quat[1];
+                double q2=Quat[2];
+                double q3=Quat[3];
+
+                Log.i(LOGTAG,q0+" "+q1+" "+q2+" "+q3);
+
+                double fi,theta,thi;
+                fi=Math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
+                theta=Math.asin(2 * (q0 * q2 - q3 * q1));
+                thi=Math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
+
+                if(fi<0) fi+=Math.PI;
+                else fi-=Math.PI;
+
+                //double temp=Math.cos(Math.PI-fi);
+                //Log.i(LOGTAG,temp+" ");
+                double angle=Math.acos(Math.sqrt(1-Math.cos(Math.PI/2-fi)*Math.cos(Math.PI/2-fi)-Math.cos(Math.PI/2-theta)*Math.cos(Math.PI/2-theta)));
+                Log.i(LOGTAG,angle+" ");
+
+                fi=fi/Math.PI*180;
+                theta=theta/Math.PI*180;
+                thi=thi/Math.PI*180;
+                angle=angle/Math.PI*180;
+
+                Log.i(LOGTAG,angle+" ");
+                Log.i(LOGTAG,fi+" "+theta+" "+thi);
 
                 if (isSticked[i]==true || (!mActivity.isExtendedTrackingActive())) {
                     Matrix.translateM(modelViewMatrix, 0, X[i], Y[i],
@@ -461,11 +510,11 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
                 if ( isSticked[i]==true || (!mActivity.isExtendedTrackingActive())) {
                     GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                            false, 0, mTeapot.getVertices());
+                            false, 0, mCube.getVertices());
                     GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-                            false, 0, mTeapot.getNormals());
+                            false, 0, mCube.getNormals());
                     GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                            GLES20.GL_FLOAT, false, 0, mTeapot.getTexCoords());
+                            GLES20.GL_FLOAT, false, 0, mCube.getTexCoords());
 
                     GLES20.glEnableVertexAttribArray(vertexHandle);
                     GLES20.glEnableVertexAttribArray(normalHandle);
@@ -483,8 +532,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
                     // finally draw the teapot
                     GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                            mTeapot.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                            mTeapot.getIndices());
+                            mCube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                            mCube.getIndices());
 
                     // disable the enabled arrays
                     GLES20.glDisableVertexAttribArray(vertexHandle);
@@ -518,9 +567,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 SampleUtils.checkGLError("Render Frame");
             }
         }
-        
+
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-        
+
         mRenderer.end();
     }
 
@@ -529,12 +578,12 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         String userData = (String) trackable.getUserData();
         Log.d(LOGTAG, "UserData:Retreived User Data	\"" + userData + "\"");
     }
-    
-    
+
+
     public void setTextures(Vector<Texture> textures)
     {
         mTextures = textures;
-        
+
     }
 
     private boolean isNotIntersected(int i,float X_temp,float Y_temp)
@@ -562,4 +611,52 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             return true;
         else return false;
     }
+
+    private double[] Mat2Quat(float[][] R) {
+
+        double[] Quat = new double[4];
+        double[] trace = new double[4];
+
+        trace[0] = 1.0f + R[0][0] + R[1][1] + R[2][2];
+        trace[1] = 1.0f + R[0][0] - R[1][1] - R[2][2];
+        trace[2] = 1.0f - R[0][0] + R[1][1] - R[2][2];
+        trace[3] = 1.0f - R[0][0] - R[1][1] + R[2][2];
+
+        int j = 0;
+        for (int i = 1; i < 4; i++) {
+            if (trace[i] > trace[j]) j = i;
+        }
+
+        if (j == 0) {
+            Quat[0] = trace[0];
+            Quat[1] = R[1][2] - R[2][1];
+            Quat[2] = R[2][0] - R[0][2];
+            Quat[3] = R[0][1] - R[1][0];
+        } else if (j == 1) {
+            Quat[0] = R[1][2] - R[2][1];
+            Quat[1] = trace[1];
+            Quat[2] = R[0][1] + R[1][0];
+            Quat[3] = R[2][0] + R[0][2];
+        } else if (j == 2) {
+            Quat[0] = R[2][0] - R[0][2];
+            Quat[1] = R[0][1] + R[1][0];
+            Quat[2] = trace[2];
+            Quat[3] = R[1][2] + R[2][1];
+        } else //j==3
+        {
+            Quat[0] = R[0][1] - R[1][0];
+            Quat[1] = R[2][0] + R[0][2];
+            Quat[2] = R[1][2] + R[1][0];
+            Quat[3] = trace[3];
+        }
+
+        double sum = Math.sqrt(0.25 / trace[j]);
+        Quat[0] *= sum;
+        Quat[1] *= sum;
+        Quat[2] *= sum;
+        Quat[3] *= sum;
+
+        return Quat;
+    }
+
 }
