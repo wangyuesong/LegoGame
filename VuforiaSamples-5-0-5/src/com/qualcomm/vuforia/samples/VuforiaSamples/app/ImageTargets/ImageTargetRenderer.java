@@ -88,7 +88,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     boolean mIsActive = false;
 
-    private static final float OBJECT_SCALE_FLOAT = 1.0f;
+    private static final float OBJECT_SCALE_FLOAT = 10.0f;
 
     private static final float CUBE_SIDE = 50.0f;
 
@@ -290,7 +290,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
 
                 float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
-/*
+
                 CameraCalibration camCal = CameraDevice.getInstance()
                         .getCameraCalibration();
 
@@ -337,39 +337,39 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                         if(distance<= 100
                                 && isNotIntersected(i, X_temp, Y_temp)
                                 && lock[i]==false)
-                       {
-                           X[i] = X_temp;
-                           Y[i] = Y_temp;
-                           Z[i] = Z_temp;
+                        {
+                            X[i] = X_temp;
+                            Y[i] = Y_temp;
+                            Z[i] = Z_temp;
 
-                           isSticked[i]=false;
-                           hasSticked=false;
-                           interval[i]=0;
+                            isSticked[i]=false;
+                            hasSticked=false;
+                            interval[i]=0;
 
-                           float[] temp=new float[16];
-                           float[] result_temp=new float[16];
-                           float[] modelViewMatrix_inv=new float[16];
+                            float[] temp=new float[16];
+                            float[] result_temp=new float[16];
+                            float[] modelViewMatrix_inv=new float[16];
 
-                           Matrix.invertM(modelViewMatrix_inv,0,modelViewMatrix,0);
+                            Matrix.invertM(modelViewMatrix_inv,0,modelViewMatrix,0);
 
-                           Matrix.setIdentityM(temp,0);
-                           temp[0]=modelViewMatrix_inv[0];
-                           temp[1]=modelViewMatrix_inv[1];
-                           temp[2]=modelViewMatrix_inv[2];
+                            Matrix.setIdentityM(temp,0);
+                            temp[0]=modelViewMatrix_inv[0];
+                            temp[1]=modelViewMatrix_inv[1];
+                            temp[2]=modelViewMatrix_inv[2];
 
-                           temp[4]=modelViewMatrix_inv[4];
-                           temp[5]=modelViewMatrix_inv[5];
-                           temp[6]=modelViewMatrix_inv[6];
+                            temp[4]=modelViewMatrix_inv[4];
+                            temp[5]=modelViewMatrix_inv[5];
+                            temp[6]=modelViewMatrix_inv[6];
 
-                           temp[8]=modelViewMatrix_inv[8];
-                           temp[9]=modelViewMatrix_inv[9];
-                           temp[10]=modelViewMatrix_inv[10];
+                            temp[8]=modelViewMatrix_inv[8];
+                            temp[9]=modelViewMatrix_inv[9];
+                            temp[10]=modelViewMatrix_inv[10];
 
-                           Matrix.multiplyMM(result_temp, 0, temp, 0, SelfRotMat.get(i), 0);
-                           SelfRotMat.set(i, result_temp);
+                            Matrix.multiplyMM(result_temp, 0, temp, 0, SelfRotMat.get(i), 0);
+                            SelfRotMat.set(i, result_temp);
 
-                           for(int m=0;m<=3;m++) lock[m]=true;
-                       }
+                            for(int m=0;m<=3;m++) lock[m]=true;
+                        }
                         else Matrix.setIdentityM(modelViewMatrix, 0);
                     }
                     else
@@ -402,14 +402,14 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                             x = fx * X_camera / Z_camera + cx;
                             y = fy * Y_camera / Z_camera + cy;
 
-                       */
+
 /* if(i==0)
                         {
                             Log.i(LOGTAG,x+","+y);
                             Log.i(LOGTAG,cx+","+cy);
-                        }*//*
+                        }*/
 
-                        //Log.i(LOGTAG,width+","+height);
+                            //Log.i(LOGTAG,width+","+height);
 
                             if ((x > 0 && x < width - 20 && y > 0
                                     && y < height - 20) && distance <= 100
@@ -449,7 +449,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                         } else interval[i]++;
                     }
                 }
-*/
+
                 float[][] mat=new float[3][3];
                 for(int index_row=0;index_row<=2;index_row++)
                     for(int index_col=0;index_col<=2;index_col++)
@@ -480,14 +480,24 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 Log.i(LOGTAG,q0+" "+q1+" "+q2+" "+q3);
 
                 double fi,theta,thi;
-                fi=Math.atan2(2*(q0*q1+q2*q3),1-2*(q1*q1+q2*q2));
+                fi=Math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
                 theta=Math.asin(2 * (q0 * q2 - q3 * q1));
                 thi=Math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
 
-                fi=fi/PI*180;
-                theta=theta/PI*180;
-                thi=thi/PI*180;
+                if(fi<0) fi+=Math.PI;
+                else fi-=Math.PI;
 
+                //double temp=Math.cos(Math.PI-fi);
+                //Log.i(LOGTAG,temp+" ");
+                double angle=Math.acos(Math.sqrt(1-Math.cos(Math.PI/2-fi)*Math.cos(Math.PI/2-fi)-Math.cos(Math.PI/2-theta)*Math.cos(Math.PI/2-theta)));
+                Log.i(LOGTAG,angle+" ");
+
+                fi=fi/Math.PI*180;
+                theta=theta/Math.PI*180;
+                thi=thi/Math.PI*180;
+                angle=angle/Math.PI*180;
+
+                Log.i(LOGTAG,angle+" ");
                 Log.i(LOGTAG,fi+" "+theta+" "+thi);
 
                 if (isSticked[i]==true || (!mActivity.isExtendedTrackingActive())) {
