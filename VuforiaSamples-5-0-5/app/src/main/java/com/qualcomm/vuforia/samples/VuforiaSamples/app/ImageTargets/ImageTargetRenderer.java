@@ -31,6 +31,7 @@ import com.qualcomm.vuforia.Vec2F;
 import com.qualcomm.vuforia.Vec3F;
 import com.qualcomm.vuforia.Vuforia;
 import com.qualcomm.vuforia.samples.SampleApplication.SampleApplicationSession;
+import com.qualcomm.vuforia.samples.SampleApplication.utils.CubeObject;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.CubeShaders;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.LoadingDialogHandler;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleApplication3DModel;
@@ -79,7 +80,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     
     private int texSampler2DHandle;
     
-    private Teapot mTeapot;
+    private CubeObject mTeapot;
     
     private float kBuildingScale = 12.0f;
     private SampleApplication3DModel mBuildingsModel;
@@ -105,7 +106,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             //initialize teapot positions
             X[i] = -120.0f+(80.0f*i);
             Y[i] = 86.5f;
-            Z[i] = OBJECT_SCALE_FLOAT;
+            Z[i] = 1.0f;
 
             //initialize self-rotation matrix
             float[] Identity=new float[16];
@@ -182,7 +183,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     // Function for initializing the renderer.
     private void initRendering()
     {
-        mTeapot = new Teapot();
+        mTeapot = new CubeObject();
         
         mRenderer = Renderer.getInstance();
         
@@ -399,7 +400,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                             x = fx * X_camera / Z_camera + cx;
                             y = fy * Y_camera / Z_camera + cy;
 
-                      
+
                             if ((x > 0 && x < width - 20 && y > 0
                                     && y < height - 20) && distance <= 100
                                     //&& isNotIntersected(i, X_camera, Y_camera)
