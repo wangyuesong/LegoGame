@@ -21,7 +21,7 @@ public class Object3D {
     public int textureId;
     public int interval;
 
-    public Object3D(double length, double width, double height, float x, float y, float z) {
+    public Object3D(double length, double width, double height, float x, float y, float z,int t) {
         selfRotationMatrix = new float[16];
         Matrix.setIdentityM(selfRotationMatrix,0);
         interval = 50;
@@ -31,6 +31,7 @@ public class Object3D {
         this.X = x;
         this.Y = y;
         this.Z = z;
+        this.textureId =t;
         cube = new CubeObject(length,width,height);
     }
 }

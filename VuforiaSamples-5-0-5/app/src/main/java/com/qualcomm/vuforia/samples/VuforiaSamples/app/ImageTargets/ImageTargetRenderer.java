@@ -145,9 +145,12 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     // Function for initializing the renderer.
     private void initRendering()
     {
-        objectList.add(new Object3D(10,10,10,-120.0f,86.5f,currentZ));
-        objectList.add(new Object3D(10,10,10,0.0f,86.5f,currentZ));
-        objectList.add(new Object3D(10,10,10,120.0f,86.5f,currentZ));
+        objectList.add(new Object3D(260,160,10,0,0,currentZ,2));
+        objectList.add(new Object3D(40,60,20,20.0f,0.0f,currentZ+20,0));
+        objectList.add(new Object3D(30,50,20,10.0f,0.0f,currentZ+40,1));
+        objectList.add(new Object3D(20,20,20,0.0f,0.0f,currentZ+60,0));
+
+
 
 //        mCube = new CubeObject(10.00f,10.0f,10.0f);
         
@@ -464,7 +467,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     // activate texture 0, bind it, and pass to shader
                     GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
                     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                            mTextures.get(textureIndex).mTextureID[0]);
+                            mTextures.get(obj.textureId).mTextureID[0]);
                     GLES20.glUniform1i(texSampler2DHandle, 0);
 
                     // pass the model view matrix to the shader
