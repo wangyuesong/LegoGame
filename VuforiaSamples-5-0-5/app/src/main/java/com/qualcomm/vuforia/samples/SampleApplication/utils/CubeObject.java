@@ -13,38 +13,8 @@ import java.nio.Buffer;
 public class CubeObject extends MeshObject
 {
     // Data for drawing the 3D plane as overlay
-    private static final double cubeVertices[]  = { 
-            -1.00f, -1.00f, 1.00f, // front
-            1.00f, -1.00f, 1.00f, 
-            1.00f, 1.00f, 1.00f,
-            -1.00f, 1.00f, 1.00f,
-                
-            -1.00f, -1.00f, -1.00f, // back
-            1.00f, -1.00f, -1.00f,
-            1.00f, 1.00f, -1.00f,
-            -1.00f, 1.00f, -1.00f,
-            
-            -1.00f, -1.00f, -1.00f, // left
-            -1.00f, -1.00f, 1.00f,
-            -1.00f, 1.00f, 1.00f,
-            -1.00f, 1.00f, -1.00f,
-            
-            1.00f, -1.00f, -1.00f, // right
-            1.00f, -1.00f, 1.00f,
-            1.00f, 1.00f, 1.00f,
-            1.00f, 1.00f, -1.00f,
-            
-            -1.00f, 1.00f, 1.00f, // top
-            1.00f, 1.00f, 1.00f,
-            1.00f, 1.00f, -1.00f,
-            -1.00f, 1.00f, -1.00f,
-            
-            -1.00f, -1.00f, 1.00f, // bottom
-            1.00f, -1.00f, 1.00f,
-            1.00f, -1.00f, -1.00f,
-            -1.00f, -1.00f, -1.00f };
-    
-    
+    private int cubeVertexLen;
+
     private static final double cubeTexcoords[] = { 
             0, 0, 1, 0, 1, 1, 0, 1,
                                                 
@@ -90,6 +60,39 @@ public class CubeObject extends MeshObject
     
     public CubeObject(double side)
     {
+        double[] cubeVertices = {
+                -1.00f, -1.00f, 1.00f, // front
+                1.00f, -1.00f, 1.00f,
+                1.00f, 1.00f, 1.00f,
+                -1.00f, 1.00f, 1.00f,
+
+                -1.00f, -1.00f, -1.00f, // back
+                1.00f, -1.00f, -1.00f,
+                1.00f, 1.00f, -1.00f,
+                -1.00f, 1.00f, -1.00f,
+
+                -1.00f, -1.00f, -1.00f, // left
+                -1.00f, -1.00f, 1.00f,
+                -1.00f, 1.00f, 1.00f,
+                -1.00f, 1.00f, -1.00f,
+
+                1.00f, -1.00f, -1.00f, // right
+                1.00f, -1.00f, 1.00f,
+                1.00f, 1.00f, 1.00f,
+                1.00f, 1.00f, -1.00f,
+
+                -1.00f, 1.00f, 1.00f, // top
+                1.00f, 1.00f, 1.00f,
+                1.00f, 1.00f, -1.00f,
+                -1.00f, 1.00f, -1.00f,
+
+                -1.00f, -1.00f, 1.00f, // bottom
+                1.00f, -1.00f, 1.00f,
+                1.00f, -1.00f, -1.00f,
+                -1.00f, -1.00f, -1.00f };
+
+        cubeVertexLen=cubeVertices.length;
+
         for(int i=0;i<=cubeVertices.length-1;i++)
             cubeVertices[i]*=side;
 
@@ -127,7 +130,7 @@ public class CubeObject extends MeshObject
     @Override
     public int getNumObjectVertex()
     {
-        return cubeVertices.length / 3;
+        return cubeVertexLen / 3;
     }
     
     
