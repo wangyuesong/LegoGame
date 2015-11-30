@@ -8,6 +8,7 @@ and other countries. Trademarks of QUALCOMM Incorporated are used with permissio
 package com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -233,8 +234,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);
         
     }
-    
-    
+
     // The render function.
     private void renderFrame()
     {
@@ -266,21 +266,35 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         //Vec2F principalPoint = cameraCalibration.getPrincipalPoint();
 
         // did we find any trackables this frame?
+        HashMap<String,Matrix44F> modelViewMap = new HashMap<String,Matrix44F>();
         for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++)
         {
             TrackableResult result = state.getTrackableResult(tIdx);
             Trackable trackable = result.getTrackable();
             printUserData(trackable);
             Matrix44F modelViewMatrix_Vuforia = Tool
-                .convertPose2GLMatrix(result.getPose());
+                    .convertPose2GLMatrix(result.getPose());
+            modelViewMap.put(trackable.getName(),modelViewMatrix_Vuforia);
+        }
 
-            int textureIndex = trackable.getName().equalsIgnoreCase("stones") ? 0
-                : 1;
-            textureIndex = trackable.getName().equalsIgnoreCase("tarmac") ? 2
-                : textureIndex;
-
+        if(modelViewMap.containsKey("chips"))
+        {
+            Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("chips");
+            int textureIndex = 1;
+            float[] modelViewProjection = new float[16];
+            float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
+            Matrix.multiplyMM(modelViewProjection, 0, Projectionmatrix, 0, modelViewMatrix_Vuforia.getData(), 0);
+            renderTeapot(modelViewProjection,textureIndex);
+        }
+        
+        if(modelViewMap.containsKey("stones"))
+        {
+//            TrackableResult result = state.getTrackableResult(tIdx);
+//            Trackable trackable = result.getTrackable();
+//            printUserData(trackable);
+            Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("stones");
+            int textureIndex = 0;
             //Log.i(LOGTAG, X_touch+" "+Y_touch);
-
             for(int i=0;i<=3;i++) {
 
                 float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
@@ -308,7 +322,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
                 if(isSticked[i]==true)
                 {
-
                     float X_temp,Y_temp,Z_temp=OBJECT_SCALE_FLOAT;
                     X_camera=X[i];Y_camera=Y[i];
 
@@ -458,6 +471,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 mat[2][1] = -0.1145467435f;
                 mat[2][2] = 0.8861718378f;
 */
+                //旋转矩阵求四元数
                 double[] Quat=new double[4];
                 Quat = Mat2Quat(mat);
 
@@ -469,6 +483,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 Log.i(LOGTAG,q0+" "+q1+" "+q2+" "+q3);
 
                 double fi,theta,thi;
+                //四元数算和平面夹角
                 fi=Math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
                 theta=Math.asin(2 * (q0 * q2 - q3 * q1));
                 thi=Math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
@@ -659,4 +674,44 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         return Quat;
     }
 
+
+
+    void renderTeapot(float[] modelViewProjection, int textureIndex)
+    {
+        Teapot mTeapot = new Teapot();
+        // activate the shader program and bind the vertex/normal/tex coords
+        GLES20.glUseProgram(shaderProgramID);
+
+        GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
+                false, 0, mTeapot.getVertices());
+        GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+                false, 0, mTeapot.getNormals());
+        GLES20.glVertexAttribPointer(textureCoordHandle, 2,
+                GLES20.GL_FLOAT, false, 0, mTeapot.getTexCoords());
+
+        GLES20.glEnableVertexAttribArray(vertexHandle);
+        GLES20.glEnableVertexAttribArray(normalHandle);
+        GLES20.glEnableVertexAttribArray(textureCoordHandle);
+
+        // activate texture 0, bind it, and pass to shader
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+                mTextures.get(textureIndex).mTextureID[0]);
+        GLES20.glUniform1i(texSampler2DHandle, 0);
+
+        // pass the model view matrix to the shader
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
+                modelViewProjection, 0);
+
+        // finally draw the teapot
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+                mTeapot.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                mTeapot.getIndices());
+
+        // disable the enabled arrays
+        GLES20.glDisableVertexAttribArray(vertexHandle);
+        GLES20.glDisableVertexAttribArray(normalHandle);
+        GLES20.glDisableVertexAttribArray(textureCoordHandle);
+//        Matrix.invertM()
+    }
 }
