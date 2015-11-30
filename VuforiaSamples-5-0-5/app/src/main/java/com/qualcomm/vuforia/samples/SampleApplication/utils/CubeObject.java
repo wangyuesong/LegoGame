@@ -56,10 +56,15 @@ public class CubeObject extends MeshObject
     private Buffer mTexCoordBuff;
     private Buffer mNormBuff;
     private Buffer mIndBuff;
-    
-    
-    public CubeObject(double side)
+
+
+    private int cubeVertLen;
+
+
+
+    public CubeObject(float length, float width, float height)
     {
+
         double[] cubeVertices = {
                 -1.00f, -1.00f, 1.00f, // front
                 1.00f, -1.00f, 1.00f,
@@ -90,12 +95,8 @@ public class CubeObject extends MeshObject
                 1.00f, -1.00f, 1.00f,
                 1.00f, -1.00f, -1.00f,
                 -1.00f, -1.00f, -1.00f };
-
-        cubeVertexLen=cubeVertices.length;
-
-        for(int i=0;i<=cubeVertices.length-1;i++)
-            cubeVertices[i]*=side;
-
+        
+        cubeVertexLen = cubeVertices.length;
         mVertBuff = fillBuffer(cubeVertices);
         mTexCoordBuff = fillBuffer(cubeTexcoords);
         mNormBuff = fillBuffer(cubeNormals);
@@ -130,7 +131,7 @@ public class CubeObject extends MeshObject
     @Override
     public int getNumObjectVertex()
     {
-        return cubeVertexLen / 3;
+        return cubeVertLen / 3;
     }
     
     
