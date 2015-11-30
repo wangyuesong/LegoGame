@@ -88,8 +88,11 @@ public class CubeObject extends MeshObject
     private Buffer mIndBuff;
     
     
-    public CubeObject()
+    public CubeObject(double side)
     {
+        for(int i=0;i<=cubeVertices.length-1;i++)
+            cubeVertices[i]*=side;
+
         mVertBuff = fillBuffer(cubeVertices);
         mTexCoordBuff = fillBuffer(cubeTexcoords);
         mNormBuff = fillBuffer(cubeNormals);
