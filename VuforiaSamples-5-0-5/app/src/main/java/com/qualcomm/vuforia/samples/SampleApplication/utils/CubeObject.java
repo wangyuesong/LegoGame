@@ -62,7 +62,7 @@ public class CubeObject extends MeshObject
 
 
 
-    public CubeObject(float length, float width, float height)
+    public CubeObject(double length, double width, double height)
     {
 
         double[] cubeVertices = {
@@ -95,7 +95,10 @@ public class CubeObject extends MeshObject
                 1.00f, -1.00f, 1.00f,
                 1.00f, -1.00f, -1.00f,
                 -1.00f, -1.00f, -1.00f };
-        
+
+        for(int i = 0; i < cubeVertices.length ; i++)
+                cubeVertices[i] *= 10.0f;
+
         cubeVertexLen = cubeVertices.length;
         mVertBuff = fillBuffer(cubeVertices);
         mTexCoordBuff = fillBuffer(cubeTexcoords);

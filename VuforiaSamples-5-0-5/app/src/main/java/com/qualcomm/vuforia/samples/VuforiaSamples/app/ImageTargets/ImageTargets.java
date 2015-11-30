@@ -156,7 +156,7 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
                 }
             }, 1000L);
 
-            mRenderer.getTouchPoint(e.getX(),e.getY(),true);
+
             return true;
         }
     }

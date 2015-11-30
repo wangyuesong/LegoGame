@@ -116,7 +116,7 @@ public class ObjectTargetRenderer implements GLSurfaceView.Renderer
     // Function for initializing the renderer.
     private void initRendering()
     {
-        mCubeObject = new CubeObject(10.00f);
+        mCubeObject = new CubeObject(10.00f,10.00f,10.00f);
         
         mRenderer = Renderer.getInstance();
         

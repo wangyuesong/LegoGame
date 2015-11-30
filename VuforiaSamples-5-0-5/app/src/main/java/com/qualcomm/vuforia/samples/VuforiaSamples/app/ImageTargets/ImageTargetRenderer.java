@@ -8,7 +8,9 @@ and other countries. Trademarks of QUALCOMM Incorporated are used with permissio
 package com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Vector;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -29,7 +31,6 @@ import com.qualcomm.vuforia.Trackable;
 import com.qualcomm.vuforia.TrackableResult;
 import com.qualcomm.vuforia.VIDEO_BACKGROUND_REFLECTION;
 import com.qualcomm.vuforia.Vec2F;
-import com.qualcomm.vuforia.Vec3F;
 import com.qualcomm.vuforia.Vuforia;
 import com.qualcomm.vuforia.samples.SampleApplication.SampleApplicationSession;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.CubeObject;
@@ -39,38 +40,19 @@ import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleApplication3DM
 import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.Teapot;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.Texture;
-import com.qualcomm.QCAR.*;
-import com.qualcomm.vuforia.CameraCalibration;
-import com.qualcomm.vuforia.Vec3F;
 
 // The renderer class for the ImageTargets sample. 
 public class ImageTargetRenderer implements GLSurfaceView.Renderer
 {
-    boolean[] isSticked=new boolean[4];
-    boolean hasSticked=false;
-    boolean[] lock=new boolean[4];
-    int[] interval=new int[4];
-
-
-    float[] X=new float[4];
-    float[] Y=new float[4];
-    float[] Z=new float[4];
-
-    float X_touch=0.0f;
-    float Y_touch=0.0f;
-    boolean touched=false;
-
-    Vector<float[]> SelfRotMat=new Vector<>();
-
     private static final String LOGTAG = "ImageTargetRenderer";
-    
+
     private SampleApplicationSession vuforiaAppSession;
     private ImageTargets mActivity;
-    
+
     private Vector<Texture> mTextures;
-    
+
     private int shaderProgramID;
-    
+
     private int vertexHandle;
     
     private int normalHandle;
@@ -80,8 +62,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     private int mvpMatrixHandle;
     
     private int texSampler2DHandle;
-    
-    private CubeObject mCube;
     
     private float kBuildingScale = 12.0f;
     private SampleApplication3DModel mBuildingsModel;
@@ -94,6 +74,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     private static final float CUBE_SIDE = 50.0f;
 
+    float currentZ = 0.0f;
 
     public ImageTargetRenderer(ImageTargets activity,
         SampleApplicationSession session)
@@ -101,47 +82,27 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         mActivity = activity;
         vuforiaAppSession = session;
 
-        SelfRotMat.setSize(4);
-        for(int i=0;i<=3;i++)
-        {
-            //initialize teapot positions
-            X[i] = -120.0f+(80.0f*i);
-            Y[i] = 86.5f;
-            Z[i] = 1.0f;
+//        selfRotateMatrixVector.setSize(4);
+//        for(int i=0;i<=3;i++)
+//        {
+//            //initialize teapot positions
+//            X[i] = -120.0f+(80.0f*i);
+//            Y[i] = 86.5f;
+//            Z[i] = 1.0f;
+//
+//            //initialize self-rotation matrix
+//            float[] Identity=new float[16];
+//            Matrix.setIdentityM(Identity,0);
+//            selfRotateMatrixVector.add(i, Identity);
+//
+//            //initialize stick or not
+//            isSticked[i]=false;
+////            interval[i]=50;
+//
+//            //initialize locks
+//            lock[i]=false;
+//        }
 
-            //initialize self-rotation matrix
-            float[] Identity=new float[16];
-            Matrix.setIdentityM(Identity,0);
-            SelfRotMat.add(i, Identity);
-
-            //initialize stick or not
-            isSticked[i]=false;
-            interval[i]=50;
-
-            //initialize locks
-            lock[i]=false;
-        }
-
-    }
-
-
-    public void getTouchPoint(float x,float y,boolean touched)
-    {
-        this.touched=touched;
-
-        if(touched) {
-            X_touch = x;
-            Y_touch = y;
-        }
-        else
-        {
-            X_touch = x;
-                    //0.0f;
-            Y_touch = y;
-                    //0.0f;
-        }
-
-        //Log.i(LOGTAG,X_touch+" "+Y_touch);
     }
 
     // Called to draw the current frame.
@@ -184,7 +145,11 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     // Function for initializing the renderer.
     private void initRendering()
     {
-        mCube = new CubeObject(10.00f);
+        objectList.add(new Object3D(10,10,10,-120.0f,86.5f,currentZ));
+        objectList.add(new Object3D(10,10,10,0.0f,86.5f,currentZ));
+        objectList.add(new Object3D(10,10,10,120.0f,86.5f,currentZ));
+
+//        mCube = new CubeObject(10.00f,10.0f,10.0f);
         
         mRenderer = Renderer.getInstance();
         
@@ -235,18 +200,18 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         
     }
 
-    // The render function.
+
+    boolean hasSticked=false;
+    int thresholdDistance = 100;
+    int thresholdInterval = 50;
+    List<Object3D> objectList = new ArrayList<Object3D>();
+
     private void renderFrame()
     {
-        //vuforiaAppSession.storeScreenDimensions();
-
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-        
         State state = mRenderer.begin();
         mRenderer.drawVideoBackground();
-        
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-        
         // handle face culling, we need to detect if we are using reflection
         // to determine the direction of the culling
         GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -256,27 +221,11 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         else
             GLES20.glFrontFace(GLES20.GL_CCW); // Back camera
 
-        //float nearPlane = 2.0f;
-        //float farPlane = 2000.0f;
-        //CameraCalibration cameraCalibration=;
 
-        // The following code reproduces the projectionMatrix above using the camera parameters
-        //Vec2F size = cameraCalibration.getSize();
-        //Vec2F focalLength = cameraCalibration.getFocalLength();
-        //Vec2F principalPoint = cameraCalibration.getPrincipalPoint();
-
-        // did we find any trackables this frame?
         HashMap<String,Matrix44F> modelViewMap = new HashMap<String,Matrix44F>();
-        for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++)
-        {
-            TrackableResult result = state.getTrackableResult(tIdx);
-            Trackable trackable = result.getTrackable();
-            printUserData(trackable);
-            Matrix44F modelViewMatrix_Vuforia = Tool
-                    .convertPose2GLMatrix(result.getPose());
-            modelViewMap.put(trackable.getName(),modelViewMatrix_Vuforia);
-        }
+        getAllModelViewMap(state, modelViewMap);
 
+        //Render teapot on chips
         if(modelViewMap.containsKey("chips"))
         {
             Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("chips");
@@ -286,30 +235,27 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             Matrix.multiplyMM(modelViewProjection, 0, Projectionmatrix, 0, modelViewMatrix_Vuforia.getData(), 0);
             renderTeapot(modelViewProjection,textureIndex);
         }
-        
+
         if(modelViewMap.containsKey("stones"))
         {
-//            TrackableResult result = state.getTrackableResult(tIdx);
-//            Trackable trackable = result.getTrackable();
-//            printUserData(trackable);
             Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("stones");
             int textureIndex = 0;
-            //Log.i(LOGTAG, X_touch+" "+Y_touch);
-            for(int i=0;i<=3;i++) {
 
+
+            for(Object3D obj: objectList) {
+                //X,Y,Z in camera coordinate
+                float X_camera,Y_camera,Z_camera;
+                double distance;
+
+                //Declare projection and modelview matrix
                 float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
-                // deal with the modelview and projection matrices
-                float[] modelViewProjection = new float[16];
-
-                float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
-
+                float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
                 CameraCalibration camCal = CameraDevice.getInstance()
                         .getCameraCalibration();
-
+                //Get intrinsic parameters
                 Vec2F f = camCal.getFocalLength();
                 Vec2F center = camCal.getPrincipalPoint();
                 Vec2F size = camCal.getSize();
-
                 float fx=f.getData()[0];
                 float fy=f.getData()[1];
                 float cx=center.getData()[0];
@@ -317,75 +263,55 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 float width=size.getData()[0];
                 float height=size.getData()[1];
 
-                float X_camera,Y_camera,Z_camera;
-                double distance;
 
-                if(isSticked[i]==true)
+                if(obj.isSticked==true)
                 {
-                    float X_temp,Y_temp,Z_temp=OBJECT_SCALE_FLOAT;
-                    X_camera=X[i];Y_camera=Y[i];
-
-                    float X_=X_camera-modelViewMatrix[12]-modelViewMatrix[8]*Z_temp;
-                    float Y_=Y_camera-modelViewMatrix[13]-modelViewMatrix[9]*Z_temp;
-
-                    X_temp= (X_*modelViewMatrix[5]-Y_*modelViewMatrix[4])/(modelViewMatrix[0]*modelViewMatrix[5]-modelViewMatrix[1]*modelViewMatrix[4]);
-                    Y_temp= (X_*modelViewMatrix[1]-Y_*modelViewMatrix[0])/(modelViewMatrix[4]*modelViewMatrix[1]-modelViewMatrix[5]*modelViewMatrix[0]);
-                    Z_camera=modelViewMatrix[2]*X_temp+modelViewMatrix[6]*Y_temp+modelViewMatrix[10]*Z_temp+modelViewMatrix[14];
-
-                    X_temp*=OBJECT_SCALE_FLOAT;
-                    Y_temp*=OBJECT_SCALE_FLOAT;
-
+                    //Calculate Xcam,Ycam,Zcam
+                    float X_obj,Y_obj,Z_obj=currentZ;
+                    X_camera=obj.X;
+                    Y_camera=obj.Y;
+                    float X_=X_camera-modelViewMatrix[12]-modelViewMatrix[8]*Z_obj;
+                    float Y_=Y_camera-modelViewMatrix[13]-modelViewMatrix[9]*Z_obj;
+                    X_obj= (X_*modelViewMatrix[5]-Y_*modelViewMatrix[4])/(modelViewMatrix[0]*modelViewMatrix[5]-modelViewMatrix[1]*modelViewMatrix[4]);
+                    Y_obj= (X_*modelViewMatrix[1]-Y_*modelViewMatrix[0])/(modelViewMatrix[4]*modelViewMatrix[1]-modelViewMatrix[5]*modelViewMatrix[0]);
+                    Z_camera=modelViewMatrix[2]*X_obj+modelViewMatrix[6]*Y_obj+modelViewMatrix[10]*Z_obj+modelViewMatrix[14];
+                    X_obj*=OBJECT_SCALE_FLOAT;
+                    Y_obj*=OBJECT_SCALE_FLOAT;
                     distance=Math.sqrt(X_camera * X_camera+ Y_camera * Y_camera + Z_camera * Z_camera);
 
-                    if(distance>100) lock[i]=false;
+                    if(distance>thresholdDistance)
+                        obj.lock=false;
 
-                    if(interval[i]==50)
+                    if(obj.interval==thresholdInterval)
                     {
                         //after sticked up, whether less than fixed distance, to re-trigger
                         //unsticking process and drop the teapot
                         //have to exceed interval time to re-trigger
-
-                        if(distance<= 100
-                                && isNotIntersected(i, X_temp, Y_temp)
-                                && lock[i]==false)
+                        if(distance<= thresholdDistance
+                                && isNotIntersected(objectList.indexOf(obj), X_obj, Y_obj)
+                                && obj.lock ==false)
                        {
-                           X[i] = X_temp;
-                           Y[i] = Y_temp;
-                           Z[i] = Z_temp;
+                           obj.X = X_obj;
+                           obj.Y = Y_obj;
+                           obj.Z = Z_obj;
 
-                           isSticked[i]=false;
+                           obj.isSticked=false;
                            hasSticked=false;
-                           interval[i]=0;
+                           obj.interval=0;
 
-                           float[] temp=new float[16];
-                           float[] result_temp=new float[16];
                            float[] modelViewMatrix_inv=new float[16];
+                           Matrix.invertM(modelViewMatrix_inv, 0, modelViewMatrix, 0);
+                           //When put back, multiply current modelViewMatrix的逆的rotation的分量
+                           getNewSelfRotationMatrix(modelViewMatrix_inv, obj);
 
-                           Matrix.invertM(modelViewMatrix_inv,0,modelViewMatrix,0);
-
-                           Matrix.setIdentityM(temp,0);
-                           temp[0]=modelViewMatrix_inv[0];
-                           temp[1]=modelViewMatrix_inv[1];
-                           temp[2]=modelViewMatrix_inv[2];
-
-                           temp[4]=modelViewMatrix_inv[4];
-                           temp[5]=modelViewMatrix_inv[5];
-                           temp[6]=modelViewMatrix_inv[6];
-
-                           temp[8]=modelViewMatrix_inv[8];
-                           temp[9]=modelViewMatrix_inv[9];
-                           temp[10]=modelViewMatrix_inv[10];
-
-                           Matrix.multiplyMM(result_temp, 0, temp, 0, SelfRotMat.get(i), 0);
-                           SelfRotMat.set(i, result_temp);
-
-                           for(int m=0;m<=3;m++) lock[m]=true;
+                           for(int m=0;m< objectList.size();m++)
+                               objectList.get(m).lock =true;
                        }
                         else Matrix.setIdentityM(modelViewMatrix, 0);
                     }
                     else
                     {
-                        interval[i]++;
+                        obj.interval ++;
                         Matrix.setIdentityM(modelViewMatrix, 0);
                     }
                 }
@@ -396,28 +322,25 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 {
                     if(hasSticked==false) {
 
-                        X_camera = X[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[0] + Y[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[4]
-                                + Z[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[8] + modelViewMatrix[12];
-                        Y_camera = X[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[1] + Y[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[5]
-                                + Z[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[9] + modelViewMatrix[13];
-                        Z_camera = X[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[2] + Y[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[6]
-                                + Z[i] * OBJECT_SCALE_FLOAT * modelViewMatrix[10] + modelViewMatrix[14];
-
+                        X_camera = obj.X * OBJECT_SCALE_FLOAT * modelViewMatrix[0] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[4]
+                                + obj.Z * OBJECT_SCALE_FLOAT * modelViewMatrix[8] + modelViewMatrix[12];
+                        Y_camera = obj.X  * OBJECT_SCALE_FLOAT * modelViewMatrix[1] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[5]
+                                + obj.Z * OBJECT_SCALE_FLOAT * modelViewMatrix[9] + modelViewMatrix[13];
+                        Z_camera = obj.X  * OBJECT_SCALE_FLOAT * modelViewMatrix[2] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[6]
+                                + obj.Z  * OBJECT_SCALE_FLOAT * modelViewMatrix[10] + modelViewMatrix[14];
                         distance = Math.sqrt(X_camera * X_camera + Y_camera * Y_camera + Z_camera * Z_camera);
 
-                        if (distance > 100) lock[i] = false;
+                        if (distance > thresholdDistance)
+                            obj.lock = false;
 
-                        if (interval[i] == 50) {
-
+                        if (obj.interval == thresholdInterval) {
                             float x, y;
                             x = fx * X_camera / Z_camera + cx;
                             y = fy * Y_camera / Z_camera + cy;
 
-
                             if ((x > 0 && x < width - 20 && y > 0
-                                    && y < height - 20) && distance <= 100
-                                    //&& isNotIntersected(i, X_camera, Y_camera)
-                                    && lock[i] == false) {
+                                    && y < height - 20) && distance <= thresholdDistance
+                                    && obj.lock == false) {
 
                                 float[] temp = new float[16];
                                 float[] result_temp = new float[16];
@@ -435,21 +358,24 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                                 temp[9] = modelViewMatrix[9];
                                 temp[10] = modelViewMatrix[10];
 
-                                Matrix.multiplyMM(result_temp, 0, temp, 0, SelfRotMat.get(i), 0);
-                                SelfRotMat.set(i, result_temp);
+                                Matrix.multiplyMM(result_temp, 0, temp, 0, obj.selfRotationMatrix, 0);
+                                obj.selfRotationMatrix = result_temp;
 
                                 Matrix.setIdentityM(modelViewMatrix, 0);
-                                X[i] = X_camera;
-                                Y[i] = Y_camera;
-                                Z[i] = Z_camera;
+                                obj.X = X_camera;
+                                obj.Y = Y_camera;
+                                obj.Z = Z_camera;
 
-                                isSticked[i] = true;
+                                obj.isSticked = true;
                                 hasSticked = true;
-                                interval[i] = 0;
+                                obj.interval = 0;
 
-                                for(int m=0;m<=3;m++) lock[m] = true;
+                                for(int m=0;m< objectList.size();m++)
+                                    objectList.get(m).lock = true;
                             }
-                        } else interval[i]++;
+                        }
+                        else
+                            obj.interval ++;
                     }
                 }
                 float[][] mat=new float[3][3];
@@ -504,9 +430,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 Log.i(LOGTAG,angle+" ");
                 Log.i(LOGTAG,fi+" "+theta+" "+thi);
 
-                if (isSticked[i]==true || (!mActivity.isExtendedTrackingActive())) {
-                    Matrix.translateM(modelViewMatrix, 0, X[i], Y[i],
-                            Z[i]);
+                if (!mActivity.isExtendedTrackingActive()) {
+                    Matrix.translateM(modelViewMatrix, 0, obj.X, obj.Y,
+                            obj.Z);
                     Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
                             OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
 
@@ -515,21 +441,21 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     Matrix.scaleM(modelViewMatrix, 0, kBuildingScale,
                             kBuildingScale, kBuildingScale);
                 }
-
-                float[] modelViewMatrix_=new float[16];
-                Matrix.multiplyMM(modelViewMatrix_, 0, modelViewMatrix, 0, SelfRotMat.get(i), 0);
-                Matrix.multiplyMM(modelViewProjection, 0, Projectionmatrix, 0, modelViewMatrix_, 0);
+                float[] modelViewProjectionMatrix = new float[16];
+                float[] tempMatrix=new float[16];
+                Matrix.multiplyMM(tempMatrix, 0, modelViewMatrix, 0, obj.selfRotationMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
 
                 // activate the shader program and bind the vertex/normal/tex coords
                 GLES20.glUseProgram(shaderProgramID);
 
-                if ( isSticked[i]==true || (!mActivity.isExtendedTrackingActive())) {
+                if (!mActivity.isExtendedTrackingActive()) {
                     GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                            false, 0, mCube.getVertices());
+                            false, 0, obj.cube.getVertices());
                     GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-                            false, 0, mCube.getNormals());
+                            false, 0, obj.cube.getNormals());
                     GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                            GLES20.GL_FLOAT, false, 0, mCube.getTexCoords());
+                            GLES20.GL_FLOAT, false, 0, obj.cube.getTexCoords());
 
                     GLES20.glEnableVertexAttribArray(vertexHandle);
                     GLES20.glEnableVertexAttribArray(normalHandle);
@@ -543,12 +469,12 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
                     // pass the model view matrix to the shader
                     GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                            modelViewProjection, 0);
+                            modelViewProjectionMatrix, 0);
 
                     // finally draw the teapot
                     GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                            mCube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                            mCube.getIndices());
+                            obj.cube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                            obj.cube.getIndices());
 
                     // disable the enabled arrays
                     GLES20.glDisableVertexAttribArray(vertexHandle);
@@ -571,7 +497,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
                             mTextures.get(3).mTextureID[0]);
                     GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                            modelViewProjection, 0);
+                            modelViewProjectionMatrix, 0);
                     GLES20.glUniform1i(texSampler2DHandle, 0);
                     GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0,
                             mBuildingsModel.getNumObjectVertex());
@@ -586,6 +512,38 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
         mRenderer.end();
+    }
+
+    //
+    private void getNewSelfRotationMatrix(float[] modelViewMatrix, Object3D obj) {
+        float[] temp=new float[16];
+        float[] result_temp=new float[16];
+        Matrix.setIdentityM(temp,0);
+
+        temp[0]=modelViewMatrix[0];
+        temp[1]=modelViewMatrix[1];
+        temp[2]=modelViewMatrix[2];
+        temp[4]=modelViewMatrix[4];
+        temp[5]=modelViewMatrix[5];
+        temp[6]=modelViewMatrix[6];
+        temp[8]=modelViewMatrix[8];
+        temp[9]=modelViewMatrix[9];
+        temp[10]=modelViewMatrix[10];
+
+        Matrix.multiplyMM(result_temp, 0, temp, 0, obj.selfRotationMatrix, 0);
+        obj.selfRotationMatrix = result_temp;
+    }
+
+    private void getAllModelViewMap(State state, HashMap<String, Matrix44F> modelViewMap) {
+        for (int tIdx = 0; tIdx < state.getNumTrackableResults(); tIdx++)
+        {
+            TrackableResult result = state.getTrackableResult(tIdx);
+            Trackable trackable = result.getTrackable();
+            printUserData(trackable);
+            Matrix44F modelViewMatrix_Vuforia = Tool
+                    .convertPose2GLMatrix(result.getPose());
+            modelViewMap.put(trackable.getName(),modelViewMatrix_Vuforia);
+        }
     }
 
     private void printUserData(Trackable trackable)
@@ -603,10 +561,10 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     private boolean isNotIntersected(int i,float X_temp,float Y_temp)
     {
-        for(int m=0;m<=3;m++)
+        for(int m=0;m< objectList.size();m++)
         {
             if(m==i) continue;
-            else if(isSticked[m] == isSticked[i]) continue;
+            else if(objectList.get(m).isSticked == objectList.get(i).isSticked) continue;
             else {
                 if (isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
                         || isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2)
@@ -621,8 +579,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     private boolean isInBox(int i,float curX,float curY)
     {
-        if(curX>X[i]-CUBE_SIDE/2 && curX<X[i]+CUBE_SIDE/2
-                && curY>Y[i]-CUBE_SIDE/2 && curY<Y[i]+CUBE_SIDE/2)
+        if(curX>objectList.get(i).X -CUBE_SIDE/2 && curX<objectList.get(i).X+CUBE_SIDE/2
+                && curY>objectList.get(i).Y-CUBE_SIDE/2 && curY<objectList.get(i).Y+CUBE_SIDE/2)
             return true;
         else return false;
     }

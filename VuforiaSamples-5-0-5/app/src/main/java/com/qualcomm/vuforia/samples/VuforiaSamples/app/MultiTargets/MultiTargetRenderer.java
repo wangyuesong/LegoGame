@@ -54,7 +54,7 @@ public class MultiTargetRenderer implements GLSurfaceView.Renderer
     private double prevTime;
     private float rotateAngle;
     
-    private CubeObject cubeObject = new CubeObject(10.00f);
+    private CubeObject cubeObject = new CubeObject(10.00f,10.00f,10.00f);
     private BowlAndSpoonObject bowlAndSpoonObject = new BowlAndSpoonObject();
     
     // Constants:
