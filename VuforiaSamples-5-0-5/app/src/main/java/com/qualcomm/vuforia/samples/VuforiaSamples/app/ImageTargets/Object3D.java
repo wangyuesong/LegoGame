@@ -29,14 +29,23 @@ public class Object3D {
     public int textureId;
     public int interval;
 
-    public Object3D(int x, int y, int z,int t,List<int[]>c) {
+    public Object3D(int x, int y, int z,int t) {
         this.centerX = x;
         this.centerY = y;
         this.centerZ = z;
-        this.offsetList = c;
         this.textureId =t;
         cube = new CubeObject();
     }
+
+    public Object3D(int x, int y, int z,int t,List<int[]> offsetList) {
+        this.centerX = x;
+        this.centerY = y;
+        this.centerZ = z;
+        this.textureId =t;
+        this.offsetList = offsetList;
+        cube = new CubeObject();
+    }
+
 
     public void down(HashMap<Integer,boolean[][]> pile){
         if (!detectCollision(pile))

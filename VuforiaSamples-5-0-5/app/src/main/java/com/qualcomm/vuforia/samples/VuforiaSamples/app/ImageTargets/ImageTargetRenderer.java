@@ -158,28 +158,12 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     }
                 }
         }
-        Object3D pileObject = new Object3D(0,0,0,1,pileList);
+
+        Object3D pileObject = new PileObject(0,0,0,1,pileList);
         objectList.add(pileObject);
-
-        List<int[]>CenterList1 =new ArrayList<int[]>();
-        CenterList1.add(new int[]{0,0,0});
-        CenterList1.add(new int[]{0,0,1});
-        objectList.add(new Object3D(0,0,6,1,CenterList1));
-
-        List<int[]>CenterList2 =new ArrayList<int[]>();
-        CenterList2.add(new int[]{0,0,0});
-        CenterList2.add(new int[]{0,0,1});
-        CenterList2.add(new int[]{0,0,2});
-        CenterList2.add(new int[]{0,0,3});
-        CenterList2.add(new int[]{0,0,4});
-        objectList.add(new Object3D(4,4,6,0,CenterList2));
-
-        List<int[]>CenterList3 =new ArrayList<int[]>();
-        CenterList3.add(new int[]{0,0,0});
-        CenterList3.add(new int[]{0,0,1});
-        CenterList3.add(new int[]{1,0,0});
-        objectList.add(new Object3D(-4,4,6,0,CenterList3));
-
+        objectList.add(new ShortStickObject(0,0,6,1));
+        objectList.add(new LongStickObject(4,4,6,0));
+        objectList.add(new CurveObject(-4,4,6,0));
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f
                 : 1.0f);
@@ -244,6 +228,20 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     }
     private void renderFrame()
     {
+        CameraCalibration camCal = CameraDevice.getInstance()
+                .getCameraCalibration();
+        //Get intrinsic parameters
+        Vec2F f = camCal.getFocalLength();
+        Vec2F center = camCal.getPrincipalPoint();
+        Vec2F size = camCal.getSize();
+        float fx=f.getData()[0];
+        float fy=f.getData()[1];
+        float cx=center.getData()[0];
+        float cy=center.getData()[1];
+        float width=size.getData()[0];
+        float height=size.getData()[1];
+
+
         count ++;
         if (count == 50) {
             count = 0;
@@ -253,132 +251,82 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             }
         }
 
-
-//        objectList.add(new Object3D(0,0,0,1,pileList));
-
-
-
-
-
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-            State state = mRenderer.begin();
-            mRenderer.drawVideoBackground();
-            GLES20.glEnable(GLES20.GL_DEPTH_TEST);
-            // handle face culling, we need to detect if we are using reflection
-            // to determine the direction of the culling
-            GLES20.glEnable(GLES20.GL_CULL_FACE);
-            GLES20.glCullFace(GLES20.GL_BACK);
-            if (Renderer.getInstance().getVideoBackgroundConfig().getReflection() == VIDEO_BACKGROUND_REFLECTION.VIDEO_BACKGROUND_REFLECTION_ON)
-                GLES20.glFrontFace(GLES20.GL_CW); // Front camera
-            else
-                GLES20.glFrontFace(GLES20.GL_CCW); // Back camera
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
+        State state = mRenderer.begin();
+        mRenderer.drawVideoBackground();
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        // handle face culling, we need to detect if we are using reflection
+        // to determine the direction of the culling
+        GLES20.glEnable(GLES20.GL_CULL_FACE);
+        GLES20.glCullFace(GLES20.GL_BACK);
+        if (Renderer.getInstance().getVideoBackgroundConfig().getReflection() == VIDEO_BACKGROUND_REFLECTION.VIDEO_BACKGROUND_REFLECTION_ON)
+            GLES20.glFrontFace(GLES20.GL_CW); // Front camera
+        else
+            GLES20.glFrontFace(GLES20.GL_CCW); // Back camera
 
 
-            HashMap<String,Matrix44F> modelViewMap = new HashMap<String,Matrix44F>();
-            getAllModelViewMap(state, modelViewMap);
+        HashMap<String,Matrix44F> modelViewMap = new HashMap<String,Matrix44F>();
+        getAllModelViewMap(state, modelViewMap);
 
-            //Render teapot on chips
-            if(modelViewMap.containsKey("chips"))
-            {
-                Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("chips");
-                int textureIndex = 1;
-                float[] modelViewProjection = new float[16];
-                float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
-                Matrix.multiplyMM(modelViewProjection, 0, Projectionmatrix, 0, modelViewMatrix_Vuforia.getData(), 0);
-                renderTeapot(modelViewProjection,textureIndex);
-            }
-
-            if(modelViewMap.containsKey("stones"))
-            {
-                Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("stones");
-                int textureIndex = 0;
-
-                Object3D pileObject = new Object3D(0,0,0,1,pileList);
-
-
-
-                for(Object3D obj: objectList) {
-                    for (int[] offset :obj.offsetList){
-                        //X,Y,Z in camera coordinate
-                        float X_camera,Y_camera,Z_camera;
-                        double distance;
-
-                        //Declare projection and modelview matrix
-                        float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
-                        float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
-                        CameraCalibration camCal = CameraDevice.getInstance()
-                                .getCameraCalibration();
-                        //Get intrinsic parameters
-                        Vec2F f = camCal.getFocalLength();
-                        Vec2F center = camCal.getPrincipalPoint();
-                        Vec2F size = camCal.getSize();
-                        float fx=f.getData()[0];
-                        float fy=f.getData()[1];
-                        float cx=center.getData()[0];
-                        float cy=center.getData()[1];
-                        float width=size.getData()[0];
-                        float height=size.getData()[1];
-
-                        if (!mActivity.isExtendedTrackingActive()) {
-
-                            Matrix.translateM(modelViewMatrix, 0, (obj.centerX +offset[0])*20, (obj.centerY +offset[1])*20,
-                                    (obj.centerZ +offset[2])*20);
-                            Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
-                                    OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
-
-                        } else {
-                            Matrix.rotateM(modelViewMatrix, 0, 90.0f, 1.0f, 0, 0);
-                            Matrix.scaleM(modelViewMatrix, 0, kBuildingScale,
-                                    kBuildingScale, kBuildingScale);
-                        }
-                        float[] modelViewProjectionMatrix = new float[16];
-                        Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-
-                        // activate the shader program and bind the vertex/normal/tex coords
-                        GLES20.glUseProgram(shaderProgramID);
-
-//                        renderObjects(obj,modelViewProjectionMatrix);
-
-                            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                                    false, 0, obj.cube.getVertices());
-                            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-                                    false, 0, obj.cube.getNormals());
-                            GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                                    GLES20.GL_FLOAT, false, 0, obj.cube.getTexCoords());
-
-                            GLES20.glEnableVertexAttribArray(vertexHandle);
-                            GLES20.glEnableVertexAttribArray(normalHandle);
-                            GLES20.glEnableVertexAttribArray(textureCoordHandle);
-
-                            // activate texture 0, bind it, and pass to shader
-                            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-                            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                                    mTextures.get(obj.textureId).mTextureID[0]);
-                            GLES20.glUniform1i(texSampler2DHandle, 0);
-
-                            // pass the model view matrix to the shader
-                            GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                                    modelViewProjectionMatrix, 0);
-
-                            // finally draw the teapot
-                            GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                                    obj.cube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                                    obj.cube.getIndices());
-
-                            // disable the enabled arrays
-                            GLES20.glDisableVertexAttribArray(vertexHandle);
-                            GLES20.glDisableVertexAttribArray(normalHandle);
-                            GLES20.glDisableVertexAttribArray(textureCoordHandle);
-                        SampleUtils.checkGLError("Render Frame");
-                    }
-                }
-            }
-
-            GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
-            mRenderer.end();
+        //Render teapot on chips
+        if(modelViewMap.containsKey("chips"))
+        {
+            Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("chips");
+            int textureIndex = 1;
+            float[] modelViewProjection = new float[16];
+            float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
+            Matrix.multiplyMM(modelViewProjection, 0, Projectionmatrix, 0, modelViewMatrix_Vuforia.getData(), 0);
+            renderTeapot(modelViewProjection,textureIndex);
         }
 
+        if(modelViewMap.containsKey("stones"))
+        {
+            Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("stones");
+            float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
+
+            for(Object3D obj: objectList)
+                render3DObject(modelViewMatrix_Vuforia, projectionMatrix, obj);
+        }
+
+        GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+
+        mRenderer.end();
+    }
+
+    private void render3DObject(Matrix44F modelViewMatrix_Vuforia, float[] projectionMatrix, Object3D obj) {
+        for (int[] offset :obj.offsetList){
+            float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
+            Matrix.translateM(modelViewMatrix, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
+                    (obj.centerZ + offset[2]) * 20);
+            Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
+                    OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
+            float[] modelViewProjectionMatrix = new float[16];
+            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
+            GLES20.glUseProgram(shaderProgramID);
+            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
+                    false, 0, obj.cube.getVertices());
+            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+                    false, 0, obj.cube.getNormals());
+            GLES20.glVertexAttribPointer(textureCoordHandle, 2,
+                    GLES20.GL_FLOAT, false, 0, obj.cube.getTexCoords());
+            GLES20.glEnableVertexAttribArray(vertexHandle);
+            GLES20.glEnableVertexAttribArray(normalHandle);
+            GLES20.glEnableVertexAttribArray(textureCoordHandle);
+            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+                    mTextures.get(obj.textureId).mTextureID[0]);
+            GLES20.glUniform1i(texSampler2DHandle, 0);
+            GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
+                    modelViewProjectionMatrix, 0);
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+                    obj.cube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                    obj.cube.getIndices());
+            GLES20.glDisableVertexAttribArray(vertexHandle);
+            GLES20.glDisableVertexAttribArray(normalHandle);
+            GLES20.glDisableVertexAttribArray(textureCoordHandle);
+            SampleUtils.checkGLError("Render Frame");
+        }
+    }
 
 
     public void renderObjects(Object3D obj, float[] modelViewProjectionMatrix)
