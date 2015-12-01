@@ -223,9 +223,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     List<int[]>pileList =new ArrayList<int[]>();
     List<Object3D> objectList = new ArrayList<Object3D>();
 
-    private void updatePile(Object3D obj)
-    {
-    }
     private void renderFrame()
     {
         CameraCalibration camCal = CameraDevice.getInstance()
@@ -250,7 +247,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
             }
         }
-
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         State state = mRenderer.begin();
         mRenderer.drawVideoBackground();

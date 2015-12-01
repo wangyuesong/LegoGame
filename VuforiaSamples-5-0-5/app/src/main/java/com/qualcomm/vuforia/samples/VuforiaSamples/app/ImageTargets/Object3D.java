@@ -54,8 +54,7 @@ public class Object3D {
     }
 
     public boolean detectCollision(HashMap<Integer,boolean[][]> pile){
-        List<int[]> newOffsetList = new ArrayList<>(offsetList);
-        newOffsetList.add(new int[]{0,0,0});
+
         for(int[] oneOffset : offsetList)
         {
             if(centerZ -1+ oneOffset[2] < 0)
