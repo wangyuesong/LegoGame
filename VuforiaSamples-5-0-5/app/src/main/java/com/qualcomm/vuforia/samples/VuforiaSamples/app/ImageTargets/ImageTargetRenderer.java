@@ -146,20 +146,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             pile.put(i,level);
         }
 
-        for(Integer key: pile.keySet())
-        {
-            boolean[][] level = pile.get(key);
-            for(int i = 0; i < level.length; i ++)
-                for(int j = 0; j < level[0].length; j ++)
-                {
-                    if(level[i][j])
-                    {
-                        pileList.add(new int[]{i - 6, j - 4, key});
-                    }
-                }
-        }
-
-        Object3D pileObject = new PileObject(0,0,0,1,pileList);
+        Object3D pileObject = pileToPileObject(pile);
         objectList.add(pileObject);
         objectList.add(new ShortStickObject(0,0,6,1));
         objectList.add(new LongStickObject(4,4,6,0));
@@ -212,6 +199,23 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     }
 
+    private Object3D pileToPileObject(HashMap<Integer,boolean[][]> pile){
+        for(Integer key: pile.keySet())
+        {
+            boolean[][] level = pile.get(key);
+            for(int i = 0; i < level.length; i ++)
+                for(int j = 0; j < level[0].length; j ++)
+                {
+                    if(level[i][j])
+                    {
+                        pileList.add(new int[]{i - 6, j - 4, key});
+                    }
+                }
+        }
+
+        Object3D pileObject = new PileObject(0,0,0,1,pileList);
+        return pileObject;
+    }
 
     boolean hasSticked=false;
     int thresholdDistance = 100;
@@ -238,13 +242,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         float width=size.getData()[0];
         float height=size.getData()[1];
 
-
         count ++;
         if (count == 50) {
             count = 0;
             for (int i = 1; i < objectList.size(); i++) {
-                objectList.get(i).down(pile);
-
+                if (objectList.get(i).detectCollision(objectList.get(0))) {
+                    ((PileObject) objectList.get(0)).mergeAnObject(objectList.get(i));
+                    objectList.remove(i);
+                    i --;
+                }else {
+                    objectList.get(i).down(objectList.get(0));
+                }
             }
         }
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -285,7 +293,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         }
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
-
         mRenderer.end();
     }
 

@@ -47,13 +47,40 @@ public class Object3D {
     }
 
 
-    public void down(HashMap<Integer,boolean[][]> pile){
+    public void down(Object3D pile){
         if (!detectCollision(pile))
          centerZ --;
 
     }
 
-    public boolean detectCollision(HashMap<Integer,boolean[][]> pile){
+
+//    for(Integer key: pile.keySet())
+//    {
+//        boolean[][] level = pile.get(key);
+//        for(int i = 0; i < level.length; i ++)
+//            for(int j = 0; j < level[0].length; j ++)
+//            {
+//                if(level[i][j])
+//                {
+//                    pileList.add(new int[]{i - 6, j - 4, key});
+//                }
+//            }
+//    }
+
+    public boolean detectCollision(Object3D pileObject){
+
+        HashMap<Integer,boolean[][]> pile = new HashMap<>();
+        for(int i =0 ; i < 10; i ++)
+        {
+            boolean[][] level = new boolean[13][9];
+            pile.put(i,level);
+        }
+        for(int[] oneOffset: pileObject.offsetList)
+        {
+            boolean[][] origin = pile.get(oneOffset[2]);
+            origin[oneOffset[0]+6][oneOffset[1]+4]  = true;
+            pile.put(oneOffset[2],origin);
+        }
 
         for(int[] oneOffset : offsetList)
         {
