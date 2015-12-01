@@ -53,22 +53,22 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     private int shaderProgramID;
 
     private int vertexHandle;
-    
+
     private int normalHandle;
-    
+
     private int textureCoordHandle;
-    
+
     private int mvpMatrixHandle;
-    
+
     private int texSampler2DHandle;
-    
+
     private float kBuildingScale = 12.0f;
     private SampleApplication3DModel mBuildingsModel;
-    
+
     private Renderer mRenderer;
-    
+
     boolean mIsActive = false;
-    
+
     private static final float OBJECT_SCALE_FLOAT = 1.0f;
 
     private static final float CUBE_SIDE = 50.0f;
@@ -110,67 +110,48 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     {
         if (!mIsActive)
             return;
-        
+
         // Call our function to render content
         renderFrame();
     }
-    
-    
+
+
     // Called when the surface is created or recreated.
     @Override
     public void onSurfaceCreated(GL10 gl, EGLConfig config)
     {
         Log.d(LOGTAG, "GLRenderer.onSurfaceCreated");
-        
+
         initRendering();
-        
+
         // Call Vuforia function to (re)initialize rendering after first use
         // or after OpenGL ES context was lost (e.g. after onPause/onResume):
         vuforiaAppSession.onSurfaceCreated();
     }
-    
-    
+
+
     // Called when the surface changed size.
     @Override
     public void onSurfaceChanged(GL10 gl, int width, int height)
     {
         Log.d(LOGTAG, "GLRenderer.onSurfaceChanged");
-        
+
         // Call Vuforia function to handle render surface size changes:
         vuforiaAppSession.onSurfaceChanged(width, height);
     }
-    
-    
+
+
     // Function for initializing the renderer.
     private void initRendering()
     {
-        List<int[]>CenterList1 =new ArrayList<int[]>();
-        CenterList1.add(new int[]{0,0,0});
-        CenterList1.add(new int[]{0,0,20});
-        objectList.add(new Object3D(0,0,0,2,CenterList1));
-
-        List<int[]>CenterList2 =new ArrayList<int[]>();
-        CenterList2.add(new int[]{0,0,0});
-        CenterList2.add(new int[]{0,0,20});
-        CenterList2.add(new int[]{0,0,40});
-        CenterList2.add(new int[]{0,0,60});
-        CenterList2.add(new int[]{0,0,80});
-        objectList.add(new Object3D(80,80,0,0,CenterList2));
-
-        List<int[]>CenterList3 =new ArrayList<int[]>();
-        CenterList3.add(new int[]{0,0,0});
-        CenterList3.add(new int[]{0,0,20});
-        CenterList3.add(new int[]{20,0,0});
-        objectList.add(new Object3D(-80,80,0,0,CenterList3));
-
 
 //        mCube = new CubeObject(10.00f,10.0f,10.0f);
-        
+
         mRenderer = Renderer.getInstance();
-        
+
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f
                 : 1.0f);
-        
+
         for (Texture t : mTextures)
         {
             GLES20.glGenTextures(1, t.mTextureID, 0);
@@ -183,11 +164,11 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 t.mWidth, t.mHeight, 0, GLES20.GL_RGBA,
                 GLES20.GL_UNSIGNED_BYTE, t.mData);
         }
-        
+
         shaderProgramID = SampleUtils.createProgramFromShaderSrc(
             CubeShaders.CUBE_MESH_VERTEX_SHADER,
             CubeShaders.CUBE_MESH_FRAGMENT_SHADER);
-        
+
         vertexHandle = GLES20.glGetAttribLocation(shaderProgramID,
             "vertexPosition");
         normalHandle = GLES20.glGetAttribLocation(shaderProgramID,
@@ -198,7 +179,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             "modelViewProjectionMatrix");
         texSampler2DHandle = GLES20.glGetUniformLocation(shaderProgramID,
             "texSampler2D");
-        
+
         try
         {
             mBuildingsModel = new SampleApplication3DModel();
@@ -208,21 +189,48 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         {
             Log.e(LOGTAG, "Unable to load buildings");
         }
-        
+
         // Hide the Loading Dialog
         mActivity.loadingDialogHandler
                 .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);
-        
+
     }
 
 
     boolean hasSticked=false;
     int thresholdDistance = 100;
     int thresholdInterval = 50;
-    List<Object3D> objectList = new ArrayList<Object3D>();
-
+    int count =50;
+    int up;
     private void renderFrame()
     {
+        count --;
+
+        if (count == 0){
+            count =50;
+            up= (up+1)%10;
+        }
+        List<Object3D> objectList = new ArrayList<Object3D>();
+        List<int[]>CenterList1 =new ArrayList<int[]>();
+        CenterList1.add(new int[]{0,0,0});
+        CenterList1.add(new int[]{0,0,1});
+        objectList.add(new Object3D(0,0,up*20,1,CenterList1));
+
+        List<int[]>CenterList2 =new ArrayList<int[]>();
+        CenterList2.add(new int[]{0,0,0});
+        CenterList2.add(new int[]{0,0,1});
+        CenterList2.add(new int[]{0,0,2});
+        CenterList2.add(new int[]{0,0,3});
+        CenterList2.add(new int[]{0,0,4});
+        objectList.add(new Object3D(80,80,up*20,0,CenterList2));
+
+        List<int[]>CenterList3 =new ArrayList<int[]>();
+        CenterList3.add(new int[]{0,0,0});
+        CenterList3.add(new int[]{0,0,1});
+        CenterList3.add(new int[]{1,0,0});
+        objectList.add(new Object3D(-80,80,up*20,0,CenterList3));
+
+
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         State state = mRenderer.begin();
         mRenderer.drawVideoBackground();
@@ -280,8 +288,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 float height=size.getData()[1];
 
                 if (!mActivity.isExtendedTrackingActive()) {
-                    Matrix.translateM(modelViewMatrix, 0, obj.centerX -offset[0], obj.centerY -offset[1],
-                            obj.centerZ -offset[2]);
+                    Matrix.translateM(modelViewMatrix, 0, obj.centerX +offset[0]*20, obj.centerY +offset[1]*20,
+                            obj.centerZ +offset[2]*20);
                     Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
                             OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
 
