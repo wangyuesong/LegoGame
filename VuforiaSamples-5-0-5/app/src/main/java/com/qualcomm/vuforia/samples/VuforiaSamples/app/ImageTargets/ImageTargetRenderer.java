@@ -145,11 +145,24 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     // Function for initializing the renderer.
     private void initRendering()
     {
-        objectList.add(new Object3D(260,160,10,0,0,currentZ,2));
-        objectList.add(new Object3D(40,60,20,20.0f,0.0f,currentZ+20,0));
-        objectList.add(new Object3D(30,50,20,10.0f,0.0f,currentZ+40,1));
-        objectList.add(new Object3D(20,20,20,0.0f,0.0f,currentZ+60,0));
+        List<float[]>CenterList1 =new ArrayList<float[]>();
+        CenterList1.add(new float[]{0,0,0});
+        CenterList1.add(new float[]{0,0,20});
+        objectList.add(new Object3D(0,0,0,2,CenterList1));
 
+        List<float[]>CenterList2 =new ArrayList<float[]>();
+        CenterList2.add(new float[]{0,0,0});
+        CenterList2.add(new float[]{0,0,20});
+        CenterList2.add(new float[]{0,0,40});
+        CenterList2.add(new float[]{0,0,60});
+        CenterList2.add(new float[]{0,0,80});
+        objectList.add(new Object3D(80,80,0,0,CenterList2));
+
+        List<float[]>CenterList3 =new ArrayList<float[]>();
+        CenterList3.add(new float[]{0,0,0});
+        CenterList3.add(new float[]{0,0,20});
+        CenterList3.add(new float[]{20,0,0});
+        objectList.add(new Object3D(-80,80,0,0,CenterList3));
 
 
 //        mCube = new CubeObject(10.00f,10.0f,10.0f);
@@ -246,6 +259,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
 
             for(Object3D obj: objectList) {
+                for (float[] offset :obj.CenterList){
                 //X,Y,Z in camera coordinate
                 float X_camera,Y_camera,Z_camera;
                 double distance;
@@ -267,175 +281,175 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 float height=size.getData()[1];
 
 
-                if(obj.isSticked==true)
-                {
-                    //Calculate Xcam,Ycam,Zcam
-                    float X_obj,Y_obj,Z_obj=currentZ;
-                    X_camera=obj.X;
-                    Y_camera=obj.Y;
-                    float X_=X_camera-modelViewMatrix[12]-modelViewMatrix[8]*Z_obj;
-                    float Y_=Y_camera-modelViewMatrix[13]-modelViewMatrix[9]*Z_obj;
-                    X_obj= (X_*modelViewMatrix[5]-Y_*modelViewMatrix[4])/(modelViewMatrix[0]*modelViewMatrix[5]-modelViewMatrix[1]*modelViewMatrix[4]);
-                    Y_obj= (X_*modelViewMatrix[1]-Y_*modelViewMatrix[0])/(modelViewMatrix[4]*modelViewMatrix[1]-modelViewMatrix[5]*modelViewMatrix[0]);
-                    Z_camera=modelViewMatrix[2]*X_obj+modelViewMatrix[6]*Y_obj+modelViewMatrix[10]*Z_obj+modelViewMatrix[14];
-                    X_obj*=OBJECT_SCALE_FLOAT;
-                    Y_obj*=OBJECT_SCALE_FLOAT;
-                    distance=Math.sqrt(X_camera * X_camera+ Y_camera * Y_camera + Z_camera * Z_camera);
-
-                    if(distance>thresholdDistance)
-                        obj.lock=false;
-
-                    if(obj.interval==thresholdInterval)
-                    {
-                        //after sticked up, whether less than fixed distance, to re-trigger
-                        //unsticking process and drop the teapot
-                        //have to exceed interval time to re-trigger
-                        if(distance<= thresholdDistance
-                                && isNotIntersected(objectList.indexOf(obj), X_obj, Y_obj)
-                                && obj.lock ==false)
-                       {
-                           obj.X = X_obj;
-                           obj.Y = Y_obj;
-                           obj.Z = Z_obj;
-
-                           obj.isSticked=false;
-                           hasSticked=false;
-                           obj.interval=0;
-
-                           float[] modelViewMatrix_inv=new float[16];
-                           Matrix.invertM(modelViewMatrix_inv, 0, modelViewMatrix, 0);
-                           //When put back, multiply current modelViewMatrix的逆的rotation的分量
-                           getNewSelfRotationMatrix(modelViewMatrix_inv, obj);
-
-                           for(int m=0;m< objectList.size();m++)
-                               objectList.get(m).lock =true;
-                       }
-                        else Matrix.setIdentityM(modelViewMatrix, 0);
-                    }
-                    else
-                    {
-                        obj.interval ++;
-                        Matrix.setIdentityM(modelViewMatrix, 0);
-                    }
-                }
-
-                //under initial state and after repositioned, whether less than fixed distance
-                //have to exceed interval time to re-trigger the sticking process
-                else
-                {
-                    if(hasSticked==false) {
-
-                        X_camera = obj.X * OBJECT_SCALE_FLOAT * modelViewMatrix[0] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[4]
-                                + obj.Z * OBJECT_SCALE_FLOAT * modelViewMatrix[8] + modelViewMatrix[12];
-                        Y_camera = obj.X  * OBJECT_SCALE_FLOAT * modelViewMatrix[1] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[5]
-                                + obj.Z * OBJECT_SCALE_FLOAT * modelViewMatrix[9] + modelViewMatrix[13];
-                        Z_camera = obj.X  * OBJECT_SCALE_FLOAT * modelViewMatrix[2] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[6]
-                                + obj.Z  * OBJECT_SCALE_FLOAT * modelViewMatrix[10] + modelViewMatrix[14];
-                        distance = Math.sqrt(X_camera * X_camera + Y_camera * Y_camera + Z_camera * Z_camera);
-
-                        if (distance > thresholdDistance)
-                            obj.lock = false;
-
-                        if (obj.interval == thresholdInterval) {
-                            float x, y;
-                            x = fx * X_camera / Z_camera + cx;
-                            y = fy * Y_camera / Z_camera + cy;
-
-                            if ((x > 0 && x < width - 20 && y > 0
-                                    && y < height - 20) && distance <= thresholdDistance
-                                    && obj.lock == false) {
-
-                                float[] temp = new float[16];
-                                float[] result_temp = new float[16];
-
-                                Matrix.setIdentityM(temp, 0);
-                                temp[0] = modelViewMatrix[0];
-                                temp[1] = modelViewMatrix[1];
-                                temp[2] = modelViewMatrix[2];
-
-                                temp[4] = modelViewMatrix[4];
-                                temp[5] = modelViewMatrix[5];
-                                temp[6] = modelViewMatrix[6];
-
-                                temp[8] = modelViewMatrix[8];
-                                temp[9] = modelViewMatrix[9];
-                                temp[10] = modelViewMatrix[10];
-
-                                Matrix.multiplyMM(result_temp, 0, temp, 0, obj.selfRotationMatrix, 0);
-                                obj.selfRotationMatrix = result_temp;
-
-                                Matrix.setIdentityM(modelViewMatrix, 0);
-                                obj.X = X_camera;
-                                obj.Y = Y_camera;
-                                obj.Z = Z_camera;
-
-                                obj.isSticked = true;
-                                hasSticked = true;
-                                obj.interval = 0;
-
-                                for(int m=0;m< objectList.size();m++)
-                                    objectList.get(m).lock = true;
-                            }
-                        }
-                        else
-                            obj.interval ++;
-                    }
-                }
-                float[][] mat=new float[3][3];
-                for(int index_row=0;index_row<=2;index_row++)
-                    for(int index_col=0;index_col<=2;index_col++)
-                    {
-                        mat[index_row][index_col]=modelViewMatrix[index_col*4+index_row];
-                    }
-/*
-                mat[0][0] = 0.8898077712f;
-                mat[0][1] = -0.0332875157f;
-                mat[0][2] = -0.4551198431f;
-
-                mat[1][0] = 0.0816309549f;
-                mat[1][1] = 0.9928600026f;
-                mat[1][2] = 0.0869793214f;
-
-                mat[2][0] = 0.4489749631f;
-                mat[2][1] = -0.1145467435f;
-                mat[2][2] = 0.8861718378f;
-*/
-                //旋转矩阵求四元数
-                double[] Quat=new double[4];
-                Quat = Mat2Quat(mat);
-
-                double q0 = Quat[0];
-                double q1=Quat[1];
-                double q2=Quat[2];
-                double q3=Quat[3];
-
-                Log.i(LOGTAG,q0+" "+q1+" "+q2+" "+q3);
-
-                double fi,theta,thi;
-                //四元数算和平面夹角
-                fi=Math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
-                theta=Math.asin(2 * (q0 * q2 - q3 * q1));
-                thi=Math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
-
-                if(fi<0) fi+=Math.PI;
-                else fi-=Math.PI;
-
-                //double temp=Math.cos(Math.PI-fi);
-                //Log.i(LOGTAG,temp+" ");
-                double angle=Math.acos(Math.sqrt(1-Math.cos(Math.PI/2-fi)*Math.cos(Math.PI/2-fi)-Math.cos(Math.PI/2-theta)*Math.cos(Math.PI/2-theta)));
-                Log.i(LOGTAG,angle+" ");
-
-                fi=fi/Math.PI*180;
-                theta=theta/Math.PI*180;
-                thi=thi/Math.PI*180;
-                angle=angle/Math.PI*180;
-
-                Log.i(LOGTAG,angle+" ");
-                Log.i(LOGTAG,fi+" "+theta+" "+thi);
-
+//                if(obj.isSticked==true)
+//                {
+//                    //Calculate Xcam,Ycam,Zcam
+//                    float X_obj,Y_obj,Z_obj=currentZ;
+//                    X_camera=obj.X;
+//                    Y_camera=obj.Y;
+//                    float X_=X_camera-modelViewMatrix[12]-modelViewMatrix[8]*Z_obj;
+//                    float Y_=Y_camera-modelViewMatrix[13]-modelViewMatrix[9]*Z_obj;
+//                    X_obj= (X_*modelViewMatrix[5]-Y_*modelViewMatrix[4])/(modelViewMatrix[0]*modelViewMatrix[5]-modelViewMatrix[1]*modelViewMatrix[4]);
+//                    Y_obj= (X_*modelViewMatrix[1]-Y_*modelViewMatrix[0])/(modelViewMatrix[4]*modelViewMatrix[1]-modelViewMatrix[5]*modelViewMatrix[0]);
+//                    Z_camera=modelViewMatrix[2]*X_obj+modelViewMatrix[6]*Y_obj+modelViewMatrix[10]*Z_obj+modelViewMatrix[14];
+//                    X_obj*=OBJECT_SCALE_FLOAT;
+//                    Y_obj*=OBJECT_SCALE_FLOAT;
+//                    distance=Math.sqrt(X_camera * X_camera+ Y_camera * Y_camera + Z_camera * Z_camera);
+//
+//                    if(distance>thresholdDistance)
+//                        obj.lock=false;
+//
+//                    if(obj.interval==thresholdInterval)
+//                    {
+//                        //after sticked up, whether less than fixed distance, to re-trigger
+//                        //unsticking process and drop the teapot
+//                        //have to exceed interval time to re-trigger
+//                        if(distance<= thresholdDistance
+//                                && isNotIntersected(objectList.indexOf(obj), X_obj, Y_obj)
+//                                && obj.lock ==false)
+//                       {
+//                           obj.X = X_obj;
+//                           obj.Y = Y_obj;
+//                           obj.Z = Z_obj;
+//
+//                           obj.isSticked=false;
+//                           hasSticked=false;
+//                           obj.interval=0;
+//
+//                           float[] modelViewMatrix_inv=new float[16];
+//                           Matrix.invertM(modelViewMatrix_inv, 0, modelViewMatrix, 0);
+//                           //When put back, multiply current modelViewMatrix的逆的rotation的分量
+//                           getNewSelfRotationMatrix(modelViewMatrix_inv, obj);
+//
+//                           for(int m=0;m< objectList.size();m++)
+//                               objectList.get(m).lock =true;
+//                       }
+//                        else Matrix.setIdentityM(modelViewMatrix, 0);
+//                    }
+//                    else
+//                    {
+//                        obj.interval ++;
+//                        Matrix.setIdentityM(modelViewMatrix, 0);
+//                    }
+//                }
+//
+//                //under initial state and after repositioned, whether less than fixed distance
+//                //have to exceed interval time to re-trigger the sticking process
+//                else
+//                {
+//                    if(hasSticked==false) {
+//
+//                        X_camera = obj.X * OBJECT_SCALE_FLOAT * modelViewMatrix[0] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[4]
+//                                + obj.Z * OBJECT_SCALE_FLOAT * modelViewMatrix[8] + modelViewMatrix[12];
+//                        Y_camera = obj.X  * OBJECT_SCALE_FLOAT * modelViewMatrix[1] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[5]
+//                                + obj.Z * OBJECT_SCALE_FLOAT * modelViewMatrix[9] + modelViewMatrix[13];
+//                        Z_camera = obj.X  * OBJECT_SCALE_FLOAT * modelViewMatrix[2] + obj.Y * OBJECT_SCALE_FLOAT * modelViewMatrix[6]
+//                                + obj.Z  * OBJECT_SCALE_FLOAT * modelViewMatrix[10] + modelViewMatrix[14];
+//                        distance = Math.sqrt(X_camera * X_camera + Y_camera * Y_camera + Z_camera * Z_camera);
+//
+//                        if (distance > thresholdDistance)
+//                            obj.lock = false;
+//
+//                        if (obj.interval == thresholdInterval) {
+//                            float x, y;
+//                            x = fx * X_camera / Z_camera + cx;
+//                            y = fy * Y_camera / Z_camera + cy;
+//
+//                            if ((x > 0 && x < width - 20 && y > 0
+//                                    && y < height - 20) && distance <= thresholdDistance
+//                                    && obj.lock == false) {
+//
+//                                float[] temp = new float[16];
+//                                float[] result_temp = new float[16];
+//
+//                                Matrix.setIdentityM(temp, 0);
+//                                temp[0] = modelViewMatrix[0];
+//                                temp[1] = modelViewMatrix[1];
+//                                temp[2] = modelViewMatrix[2];
+//
+//                                temp[4] = modelViewMatrix[4];
+//                                temp[5] = modelViewMatrix[5];
+//                                temp[6] = modelViewMatrix[6];
+//
+//                                temp[8] = modelViewMatrix[8];
+//                                temp[9] = modelViewMatrix[9];
+//                                temp[10] = modelViewMatrix[10];
+//
+//                                Matrix.multiplyMM(result_temp, 0, temp, 0, obj.selfRotationMatrix, 0);
+//                                obj.selfRotationMatrix = result_temp;
+//
+//                                Matrix.setIdentityM(modelViewMatrix, 0);
+//                                obj.X = X_camera;
+//                                obj.Y = Y_camera;
+//                                obj.Z = Z_camera;
+//
+//                                obj.isSticked = true;
+//                                hasSticked = true;
+//                                obj.interval = 0;
+//
+//                                for(int m=0;m< objectList.size();m++)
+//                                    objectList.get(m).lock = true;
+//                            }
+//                        }
+//                        else
+//                            obj.interval ++;
+//                    }
+//                }
+//                float[][] mat=new float[3][3];
+//                for(int index_row=0;index_row<=2;index_row++)
+//                    for(int index_col=0;index_col<=2;index_col++)
+//                    {
+//                        mat[index_row][index_col]=modelViewMatrix[index_col*4+index_row];
+//                    }
+///*
+//                mat[0][0] = 0.8898077712f;
+//                mat[0][1] = -0.0332875157f;
+//                mat[0][2] = -0.4551198431f;
+//
+//                mat[1][0] = 0.0816309549f;
+//                mat[1][1] = 0.9928600026f;
+//                mat[1][2] = 0.0869793214f;
+//
+//                mat[2][0] = 0.4489749631f;
+//                mat[2][1] = -0.1145467435f;
+//                mat[2][2] = 0.8861718378f;
+//*/
+//                //旋转矩阵求四元数
+//                double[] Quat=new double[4];
+//                Quat = Mat2Quat(mat);
+//
+//                double q0 = Quat[0];
+//                double q1=Quat[1];
+//                double q2=Quat[2];
+//                double q3=Quat[3];
+//
+//                Log.i(LOGTAG,q0+" "+q1+" "+q2+" "+q3);
+//
+//                double fi,theta,thi;
+//                //四元数算和平面夹角
+//                fi=Math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
+//                theta=Math.asin(2 * (q0 * q2 - q3 * q1));
+//                thi=Math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
+//
+//                if(fi<0) fi+=Math.PI;
+//                else fi-=Math.PI;
+//
+//                //double temp=Math.cos(Math.PI-fi);
+//                //Log.i(LOGTAG,temp+" ");
+//                double angle=Math.acos(Math.sqrt(1-Math.cos(Math.PI/2-fi)*Math.cos(Math.PI/2-fi)-Math.cos(Math.PI/2-theta)*Math.cos(Math.PI/2-theta)));
+//                Log.i(LOGTAG,angle+" ");
+//
+//                fi=fi/Math.PI*180;
+//                theta=theta/Math.PI*180;
+//                thi=thi/Math.PI*180;
+//                angle=angle/Math.PI*180;
+//
+//                Log.i(LOGTAG,angle+" ");
+//                Log.i(LOGTAG,fi+" "+theta+" "+thi);
+//
                 if (!mActivity.isExtendedTrackingActive()) {
-                    Matrix.translateM(modelViewMatrix, 0, obj.X, obj.Y,
-                            obj.Z);
+                    Matrix.translateM(modelViewMatrix, 0, obj.Center_X-offset[0], obj.Center_Y-offset[1],
+                            obj.Center_Z-offset[2]);
                     Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
                             OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
 
@@ -445,9 +459,10 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                             kBuildingScale, kBuildingScale);
                 }
                 float[] modelViewProjectionMatrix = new float[16];
-                float[] tempMatrix=new float[16];
-                Matrix.multiplyMM(tempMatrix, 0, modelViewMatrix, 0, obj.selfRotationMatrix, 0);
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
+                //float[] tempMatrix=new float[16];
+                //Matrix.multiplyMM(tempMatrix, 0, modelViewMatrix, 0, obj.selfRotationMatrix, 0);
+                //Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
 
                 // activate the shader program and bind the vertex/normal/tex coords
                 GLES20.glUseProgram(shaderProgramID);
@@ -511,6 +526,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 SampleUtils.checkGLError("Render Frame");
             }
         }
+        }
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
 
@@ -562,31 +578,31 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     }
 
-    private boolean isNotIntersected(int i,float X_temp,float Y_temp)
-    {
-        for(int m=0;m< objectList.size();m++)
-        {
-            if(m==i) continue;
-            else if(objectList.get(m).isSticked == objectList.get(i).isSticked) continue;
-            else {
-                if (isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
-                        || isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2)
-                        || isInBox(m, X_temp + CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
-                        || isInBox(m, X_temp + CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2))
-                    return false;
-            }
-        }
+//    private boolean isNotIntersected(int i,float X_temp,float Y_temp)
+//    {
+//        for(int m=0;m< objectList.size();m++)
+//        {
+//            if(m==i) continue;
+//            else if(objectList.get(m).isSticked == objectList.get(i).isSticked) continue;
+//            else {
+//                if (isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
+//                        || isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2)
+//                        || isInBox(m, X_temp + CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
+//                        || isInBox(m, X_temp + CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2))
+//                    return false;
+//            }
+//        }
+//
+//        return true;
+//    }
 
-        return true;
-    }
-
-    private boolean isInBox(int i,float curX,float curY)
-    {
-        if(curX>objectList.get(i).X -CUBE_SIDE/2 && curX<objectList.get(i).X+CUBE_SIDE/2
-                && curY>objectList.get(i).Y-CUBE_SIDE/2 && curY<objectList.get(i).Y+CUBE_SIDE/2)
-            return true;
-        else return false;
-    }
+//    private boolean isInBox(int i,float curX,float curY)
+//    {
+//        if(curX>objectList.get(i).X -CUBE_SIDE/2 && curX<objectList.get(i).X+CUBE_SIDE/2
+//                && curY>objectList.get(i).Y-CUBE_SIDE/2 && curY<objectList.get(i).Y+CUBE_SIDE/2)
+//            return true;
+//        else return false;
+//    }
 
     private double[] Mat2Quat(float[][] R) {
 
