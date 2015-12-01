@@ -38,60 +38,25 @@ public class Object3D {
         cube = new CubeObject();
     }
 
-    private Map<Coordinate2D,Integer> findLowestBottom()
-    {
-        HashMap<Coordinate2D,Integer> coordinateAndZMap = new HashMap<>();
-        for(int[] offsetXYZ: offsetList) {
-            Coordinate2D coord = new Coordinate2D(centerX+ offsetXYZ[0],centerY + offsetXYZ[1]);
-            if(!coordinateAndZMap.containsKey(coord))
-                coordinateAndZMap.put(coord,offsetXYZ[2]);
-            else {
-                if (offsetXYZ[2] < coordinateAndZMap.get(coord))
-                    coordinateAndZMap.put(coord, offsetXYZ[2]);
-            }
-        }
-        return coordinateAndZMap;
+    public void down(HashMap<Integer,boolean[][]> pile){
+        if (!detectCollision(pile))
+         centerZ --;
+
     }
 
-    public static void main(String[] args)
-    {
-        Object3D o = new Object3D(0,0,0,8,new ArrayList<int[]>());
-        ArrayList<int[]> arrayList = new ArrayList<>();
-        arrayList.add(new int[]{1,1,1});
-        arrayList.add(new int[]{1,1,-1});
-        arrayList.add(new int[]{-1,1,1});
-        arrayList.add(new int[]{-1,1,2});
-        arrayList.add(new int[]{0,0,0});
-
-        o.offsetList = arrayList;
-        Map<Coordinate2D,Integer>  a = o.findLowestBottom();
-        for(Coordinate2D key:a.keySet())
+    public boolean detectCollision(HashMap<Integer,boolean[][]> pile){
+        List<int[]> newOffsetList = new ArrayList<>(offsetList);
+        newOffsetList.add(new int[]{0,0,0});
+        for(int[] oneOffset : offsetList)
         {
-            System.out.println(a.get(key));
+            if(centerZ -1+ oneOffset[2] < 0)
+                continue;
+            if(pile.get(centerZ -1+ oneOffset[2])[centerX + oneOffset[0] + 6][centerY + oneOffset[1] + 4])
+                return true;
         }
+        return false;
     }
 
-    private static HashMap<Integer,boolean[][]> levelOccupation;
 
-    public static class Coordinate2D{
-        @Override
-        public boolean equals(Object o) {
-            Coordinate2D c = (Coordinate2D)o;
-            return (c.X == this.X) && (c.Y == this.Y);
-        }
-
-        @Override
-        public int hashCode() {
-            return X * 100000 + Y;
-        }
-
-        public Coordinate2D(int x, int y) {
-            X = x;
-            Y = y;
-        }
-
-        public int X;
-        public int Y;
-    }
 
 }
