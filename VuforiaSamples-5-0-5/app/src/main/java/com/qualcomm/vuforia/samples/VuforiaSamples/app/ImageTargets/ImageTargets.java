@@ -20,10 +20,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
 import android.widget.Toast;
@@ -54,7 +57,7 @@ import java.util.Vector;
 
 
 public class ImageTargets extends Activity implements SampleApplicationControl,
-    SampleAppMenuInterface
+    SampleAppMenuInterface, View.OnClickListener
 {
     private static final String LOGTAG = "ImageTargets";
     
@@ -94,8 +97,30 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     private AlertDialog mErrorDialog;
     
     boolean mIsDroidDevice = false;
-    
-    
+
+    @Override
+    public void onClick(View v) {
+            switch(v.getId()){
+                case R.id.left:
+                    Log.i(LOGTAG,"LEFT");
+                    break;
+                case R.id.right:
+                    Log.i(LOGTAG,"RIGHT");
+                    break;
+                case R.id.center:
+                    Log.i(LOGTAG,"CENTER");
+                    break;
+                case R.id.top:
+                    Log.i(LOGTAG,"TOP");
+                    break;
+                case R.id.bottom:
+                    Log.i(LOGTAG,"BOTTOM");
+                    break;
+                default:
+                    break;
+            }
+    }
+
     // Called when the activity first starts or the user navigates back to an
     // activity.
     @Override
@@ -121,8 +146,15 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         
         mIsDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith(
             "droid");
-        
+
+        ((Button)findViewById(R.id.left)).setOnClickListener(this);
+        ((Button)findViewById(R.id.right)).setOnClickListener(this);
+        ((Button)findViewById(R.id.bottom)).setOnClickListener(this);
+        ((Button)findViewById(R.id.top)).setOnClickListener(this);
+        ((Button)findViewById(R.id.center)).setOnClickListener(this);
+
     }
+
     
     // Process Single Tap event to trigger autofocus
     private class GestureListener extends
@@ -295,7 +327,6 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         mRenderer = new ImageTargetRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
         mGlView.setRenderer(mRenderer);
-        
     }
     
     
@@ -303,7 +334,6 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     {
         mUILayout = (RelativeLayout) View.inflate(this, R.layout.camera_overlay,
             null);
-        
         mUILayout.setVisibility(View.VISIBLE);
         mUILayout.setBackgroundColor(Color.BLACK);
         
@@ -318,7 +348,6 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         // Adds the inflated layout to the view
         addContentView(mUILayout, new LayoutParams(LayoutParams.MATCH_PARENT,
             LayoutParams.MATCH_PARENT));
-        
     }
     
     
@@ -398,7 +427,7 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     @Override
     public void onInitARDone(SampleApplicationException exception)
     {
-        
+
         if (exception == null)
         {
             initApplicationAR();
@@ -444,8 +473,7 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
             showInitializationErrorMessage(exception.getString());
         }
     }
-    
-    
+
     // Shows initialization error messages as System dialogs
     public void showInitializationErrorMessage(String message)
     {
