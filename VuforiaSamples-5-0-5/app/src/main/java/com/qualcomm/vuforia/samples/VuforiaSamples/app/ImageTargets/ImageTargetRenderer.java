@@ -148,19 +148,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     for(int h =0; h < level[0].length; h++)
                     {
                         if (k ==6 && h ==4 )level[k][h] = false;
-                    else level[k][h] = true;
+                        else level[k][h] = true;
                     }
             }
-
-
             pile.put(i,level);
         }
         Object3D pileObject = pileToPileObject(pile);
         //add pileObject and 3 unique objects to the objectList
         objectList.add(pileObject);
-        objectList.add(new ShortStickObject(0,0,6,0));
-        objectList.add(new LongStickObject(4,4,6,0));
-        objectList.add(new CurveObject(-4,4,6,0));
+        objectList.add(new ShortStickObject(0,0,6,1));
+        objectList.add(new LongStickObject(4,4,6,1));
+        objectList.add(new CurveObject(-4,4,6,1));
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f
                 : 1.0f);
@@ -224,7 +222,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 }
         }
 
-        Object3D pileObject = new PileObject(0,0,0,1,pileList);
+        Object3D pileObject = new PileObject(0,0,0,5,pileList);
         return pileObject;
     }
 
@@ -240,17 +238,10 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     int addObject =0;
     int random =0;
+    int randomfalldown =0;
     private void renderFrame()
     {
         addObject++;
-//        if(addObject == 300)
-//        {
-//            addObject =0;
-//            objectList.add(new ShortStickObject(1,1,9,1));
-//            objectList.add(new LongStickObject(2,4,9,0));
-//            objectList.add(new CurveObject(-2,4,9,0));
-//        }
-
         CameraCalibration camCal = CameraDevice.getInstance()
                 .getCameraCalibration();
         //Get intrinsic parameters
@@ -265,10 +256,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         float height=size.getData()[1];
         int []countlevel = new int[10];
 
-
-
         count ++;
-        if (count == 50) {
+        if (count == 10) {
             count = 0;
             for (int i = 1; i < objectList.size(); i++) {
                 if (objectList.get(i).detectCollision(objectList.get(0))) {
@@ -280,17 +269,28 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 }
             }
         }
-        //Log.d(LOGTAG, "objectList.get(0).offsetList.size()	" + objectList.get(0).offsetList.size()+ "\"");
-        //objectList.get(0).offsetList.size()
+
         ((PileObject) objectList.get(0)).elimate();
-        Random rand;
-        if(addObject == 300){
-            addObject =0;
-           // objectList.add(new ShortStickObject( -6,-4,6,0));
-           // objectList.add(new ShortStickObject(rand.nextInt((6 + 6) + 1) -6,rand.nextInt((8) + 1) -4,6,0));
-           // objectList.add(new ShortStickObject( ThreadLocalRandom.current().nextInt(-6, 6 + 1),ThreadLocalRandom.current().nextInt(-4, 4 + 1),6,0));
-        objectList.add(new LongStickObject(-6+(int)(Math.random()*12.f),-4+(int)(Math.random()*8.f),6,0));
-//        objectList.add(new CurveObject(-6+(int)(Math.random()*6),-4+(int)(Math.random()*4),6,0));
+        if(addObject == 100) {
+            addObject = 0;
+            randomfalldown = (int) (Math.floor(Math.random() * 4) +0);
+            switch (randomfalldown) {
+                case 0:
+                    objectList.add(new LongStickObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 0));
+                    break;
+                case 1:
+                    objectList.add(new ShortStickObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 1));
+                    break;
+                case 2:
+                    objectList.add(new CurveObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 2));
+                    break;
+                case 3:
+                    objectList.add(new AutoObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 3));
+                    break;
+                case 4:
+                    objectList.add(new DoubleCurveObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 4));
+                    break;
+            }
         }
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         State state = mRenderer.begin();
