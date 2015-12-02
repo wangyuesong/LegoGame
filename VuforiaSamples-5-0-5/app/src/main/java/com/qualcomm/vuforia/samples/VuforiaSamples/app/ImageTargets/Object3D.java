@@ -48,24 +48,11 @@ public class Object3D {
 
 
     public void down(Object3D pile){
-        if (!detectCollision(pile))
+        if (!detectCollision(pile)&&centerZ!=0)
          centerZ --;
 
     }
 
-
-//    for(Integer key: pile.keySet())
-//    {
-//        boolean[][] level = pile.get(key);
-//        for(int i = 0; i < level.length; i ++)
-//            for(int j = 0; j < level[0].length; j ++)
-//            {
-//                if(level[i][j])
-//                {
-//                    pileList.add(new int[]{i - 6, j - 4, key});
-//                }
-//            }
-//    }
 
     public boolean detectCollision(Object3D pileObject){
 
