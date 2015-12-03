@@ -239,7 +239,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     int random =0;
     int randomfalldown =0;
 
-    Object3D fallingObject = new ShortStickObject(0,0,0,1);
+    Object3D fallingObject = new CurveObject(0,0,0,1);
 
     private void renderFrame()
     {
@@ -329,7 +329,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             double slopingAngle = getSlopingAngle(bottomModelViewMatrix, boardModelViewMatrix);
 
 
-//            fallingObject.updateBottomOffset(boardToBottomModelViewMatrix);
+           //fallingObject.updateBottomOffset(boardToBottomModelViewMatrix);
 
             if (!fallingObject.isInBoardCoordinate) {
                 fallingObject.isInBoardCoordinate = true;
@@ -339,7 +339,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                         , getRotationMatrix(bottomToBoardModelViewMatrix), 0
                         , fallingObject.onBottomSelfRotationMatrix, 0);
 //                fallingObject.updateBoardOffset(getRotationMatrix(bottomToBoardModelViewMatrix));
-                fallingObject.onBoardSelfRotationMatrix = tempMatrix;
+                fallingObject.onBoardSelfRotationMatrix = tempMatrix.clone();
             }
             //Render objects on board coordinate when the object is NOT falling
             if (!fallingObject.isFalling) {
@@ -411,7 +411,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             //fallingObject.updateBottomOffset(getRotationMatrix(boardToBottomModelViewMatrix));
         }
 //
-        else if (fallingObject.isFalling &&modelViewMap.containsKey("stones")) {
+        else if (fallingObject.isFalling && modelViewMap.containsKey("stones")) {
             float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
 
             fallingObject.isMoved = false;
@@ -477,6 +477,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         float boardOrBottomCenterX = 0.0f;
         float boardOrBottomCenterY = 0.0f;
         float boardOrBottomCenterZ = 0.0f;
+
         float[] boardOrBottomSelfRotationMatrix = new float[16];
 
         switch (mode){
@@ -485,14 +486,14 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 boardOrBottomCenterX = obj.boardCenterX;
                 boardOrBottomCenterY = obj.boardCenterY;
                 boardOrBottomCenterZ = obj.boardCenterZ;
-                boardOrBottomSelfRotationMatrix= obj.onBoardSelfRotationMatrix;
+                boardOrBottomSelfRotationMatrix= obj.onBoardSelfRotationMatrix.clone();
                 break;
             case ON_BOTTOM:
                 boardOrBottomOffsetList = new ArrayList<>(obj.bottomOffsetList);
                 boardOrBottomCenterX = obj.bottomCenterX;
                 boardOrBottomCenterY = obj.bottomCenterY;
                 boardOrBottomCenterZ = obj.bottomCenterZ;
-                boardOrBottomSelfRotationMatrix = obj.onBottomSelfRotationMatrix;
+                boardOrBottomSelfRotationMatrix = obj.onBottomSelfRotationMatrix.clone();
                 break;
             case ON_BOTTOM_GRID:
                 break;
@@ -534,49 +535,22 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         else{
             for (float[] offset :boardOrBottomOffsetList){
 
-                    float[][] floatCoords = new float[4][1];
-                floatCoords[0][0] = offset[0];
-                floatCoords[1][0] = offset[1];
-                floatCoords[2][0] = offset[2];
-                floatCoords[3][0] = 1;
-                float[][] temp = new float[4][4];
+                float[] tempMatrix2 = new float[16];
+                Matrix.multiplyMM(tempMatrix2, 0, boardOrBottomSelfRotationMatrix, 0, getTranslationMatrix(offset[0]*20,offset[1]*20,offset[2]*20), 0);
 
-                for(int i = 0 ; i < 4; i ++)
-                {
-                    for(int j = 0 ; j < 4; j ++)
-                    {
-                        temp[i][j] = boardOrBottomSelfRotationMatrix[j*4 + i];
-                    }
-                }
-            //    Matrix.setIdentityM(temp,0);
+                float[] tempMatrix3 = new float[16];
+                //if(offset.equals(boardOrBottomOffsetList.get(0))) tempMatrix2=boardOrBottomSelfRotationMatrix.clone();
+                Matrix.multiplyMM(tempMatrix3,0, getTranslationMatrix(boardOrBottomCenterX
+                        ,boardOrBottomCenterY,boardOrBottomCenterZ),0
+                        ,tempMatrix2,0);
 
-//             temp[0][0] = 0.707f;
-//                temp[1][0] = 0.707f;
-//                temp[0][1] = -0.707f;
-//                temp[1][1] = 0.707f;
-//                temp[2][2] = 1;
-//                temp[3][3] = 1;
+                float[] newModelViewMatrix = new float[16];
+                Matrix.multiplyMM(newModelViewMatrix,
+                        0, modelViewMatrix, 0, tempMatrix3, 0);
 
-                float[][] result = new float[4][1];
-                multiply(result, temp, 4, 4, floatCoords, 4, 1);
-                float[] newOffset = new float[3];
-                newOffset[0] = result[0][0];
-                newOffset[1] = result[1][0];
-                newOffset[2] = result[2][0];
-                Log.i(LOGTAG,"Offset:" + newOffset[0] + "," + newOffset[1] + "," + newOffset[2]);
-
-
-
-
-                Matrix.translateM(modelViewMatrixCopy, 0, boardOrBottomCenterX + newOffset[0] , boardOrBottomCenterY + newOffset[1] ,
-                        boardOrBottomCenterZ + newOffset[2]);
-                Matrix.scaleM(modelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
-                        OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
-                float[] tempMatrix = new float[16];
-                //tempMatrix = modelViewMatrixCopy;
-                Matrix.multiplyMM(tempMatrix, 0, modelViewMatrixCopy, 0, boardOrBottomSelfRotationMatrix, 0);
                 float[] modelViewProjectionMatrix = new float[16];
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, newModelViewMatrix, 0);
+
                 GLES20.glUseProgram(shaderProgramID);
                 GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
                         false, 0, obj.cube.getVertices());
@@ -844,6 +818,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         theta=theta/Math.PI*180;
 
         return angle_degree;
+    }
+
+    private float[] getTranslationMatrix(float X,float Y, float Z)
+    {
+        float[] result=new float[16];
+        Matrix.setIdentityM(result,0);
+        result[12]=X;
+        result[13]=Y;
+        result[14]=Z;
+
+        return result;
     }
 
     private float[] getRotationMatrix(float[] modelViewMatrix)
