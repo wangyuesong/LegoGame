@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Random;
 import java.util.Vector;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -40,7 +39,7 @@ import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleApplication3DM
 import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.Teapot;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.Texture;
-import java.util.concurrent.ThreadLocalRandom;
+
 // The renderer class for the ImageTargets sample.
 public class ImageTargetRenderer implements GLSurfaceView.Renderer
 {
@@ -239,6 +238,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     int addObject =0;
     int random =0;
     int randomfalldown =0;
+
+    Object3D fallingObject = new ShortStickObject(0,0,0,1);
+
     private void renderFrame()
     {
         addObject++;
@@ -254,7 +256,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         float cy=center.getData()[1];
         float width=size.getData()[0];
         float height=size.getData()[1];
-        int []countlevel = new int[10];
+        int[] countlevel = new int[10];
 
         count ++;
         if (count == 10) {
@@ -305,66 +307,300 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         else
             GLES20.glFrontFace(GLES20.GL_CCW); // Back camera
 
-
         HashMap<String,Matrix44F> modelViewMap = new HashMap<String,Matrix44F>();
         getAllModelViewMap(state, modelViewMap);
 
-        //Render teapot on chips
-        if(modelViewMap.containsKey("chips"))
-        {
-            Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("chips");
-            int textureIndex = 1;
+        float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
+
+
+        if(modelViewMap.containsKey("chips") && modelViewMap.containsKey("stones")) {
+            float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
+            float[] boardModelViewMatrix = modelViewMap.get("chips").getData();
+            float[] invertedBottomModelViewMatrix = new float[16];
+            Matrix.invertM(invertedBottomModelViewMatrix, 0, bottomModelViewMatrix, 0);
+
+            float[] boardToBottomModelViewMatrix = new float[16];
+            Matrix.multiplyMM(boardToBottomModelViewMatrix, 0, invertedBottomModelViewMatrix, 0, boardModelViewMatrix, 0);
+
+            float[] bottomToBoardModelViewMatrix = new float[16];
+            Matrix.invertM(bottomToBoardModelViewMatrix, 0, boardToBottomModelViewMatrix, 0);
+
+
+            double slopingAngle = getSlopingAngle(bottomModelViewMatrix, boardModelViewMatrix);
+
+
+//            fallingObject.updateBottomOffset(boardToBottomModelViewMatrix);
+
+            if (!fallingObject.isInBoardCoordinate) {
+                fallingObject.isInBoardCoordinate = true;
+                float[] tempMatrix = new float[16];
+
+                Matrix.multiplyMM(tempMatrix, 0
+                        , getRotationMatrix(bottomToBoardModelViewMatrix), 0
+                        , fallingObject.onBottomSelfRotationMatrix, 0);
+//                fallingObject.updateBoardOffset(getRotationMatrix(bottomToBoardModelViewMatrix));
+                fallingObject.onBoardSelfRotationMatrix = tempMatrix;
+            }
+            //Render objects on board coordinate when the object is NOT falling
+            if (!fallingObject.isFalling) {
+                float[] tempModelViewMatrix = boardModelViewMatrix.clone();
+                Matrix.setIdentityM(fallingObject.onBoardSelfRotationMatrix, 0);
+                if (slopingAngle > 90) {
+                    //Fall from board to bottom, change coordinate system
+                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
+                    fallingObject.isFalling = true;
+                }
+                else {
+                    render3DObject(tempModelViewMatrix, projectionMatrix, fallingObject, ON_BOARD);
+                    Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
+                    Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
+
+                }
+            }
+
+
+            //Render objects on board coordinate when the object is falling
+            else {
+                float boardCenterInBottomCoordinateX = boardToBottomModelViewMatrix[12];
+                float boardCenterInBottomCoordinateY = boardToBottomModelViewMatrix[13];
+                float boardCenterInBottomCoordinateZ = boardToBottomModelViewMatrix[14];
+
+                double distance = Math.sqrt((fallingObject.bottomCenterX - boardCenterInBottomCoordinateX) * (fallingObject.bottomCenterX - boardCenterInBottomCoordinateX) +
+                        (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) * (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) +
+                        (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ) * (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ));
+
+                if (distance < 250 && fallingObject.isMoved == false) {
+                    fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
+                    fallingObject.moveCount = 0;
+                    fallingObject.isMoved = true;
+                }
+
+                //When the object is being pushed
+                if (distance < 250 && fallingObject.isMoved && fallingObject.moveCount < 50) {
+                    fallingObject.moveCount++;
+                    float currentZ = fallingObject.bottomCenterZ;
+                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
+//                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
+                    if (currentZ - 1 > 0)
+                        fallingObject.bottomCenterZ = currentZ - 1;
+
+                    fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
+                }
+                //Not being pushed
+                else {
+                    fallingObject.isMoved = false;
+                    fallingObject.moveCount = 50;
+
+                    if (fallingObject.bottomCenterZ - 1 > 0)
+                        fallingObject.bottomCenterZ -= 1;
+
+                    fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
+                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
+                }
+
+                render3DObject(boardModelViewMatrix.clone(), projectionMatrix, fallingObject, ON_BOARD);
+                Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
+                Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
+
+
+            }
+
+            Matrix.multiplyMM(fallingObject.onBottomSelfRotationMatrix, 0
+                    , getRotationMatrix(boardToBottomModelViewMatrix), 0
+                    , fallingObject.onBoardSelfRotationMatrix, 0);
+            //fallingObject.updateBottomOffset(getRotationMatrix(boardToBottomModelViewMatrix));
+        }
+//
+        else if (fallingObject.isFalling &&modelViewMap.containsKey("stones")) {
+            float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
+
+            fallingObject.isMoved = false;
+            fallingObject.moveCount=50;
+            fallingObject.isInBoardCoordinate=false;
+
             float[] modelViewProjection = new float[16];
             float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
-            Matrix.multiplyMM(modelViewProjection, 0, Projectionmatrix, 0, modelViewMatrix_Vuforia.getData(), 0);
-            renderTeapot(modelViewProjection,textureIndex);
-        }
 
-        if(modelViewMap.containsKey("stones"))
-        {
-            Matrix44F modelViewMatrix_Vuforia = modelViewMap.get("stones");
-            float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
-            for(Object3D obj: objectList)
-                render3DObject(modelViewMatrix_Vuforia, projectionMatrix, obj);
+            if (fallingObject.bottomCenterZ - 1 > 0)
+                fallingObject.bottomCenterZ -= 1;
+
+            render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
+            Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
+            Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
+
+
         }
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         mRenderer.end();
     }
 
-    private void render3DObject(Matrix44F modelViewMatrix_Vuforia, float[] projectionMatrix, Object3D obj) {
-        for (int[] offset :obj.offsetList){
-            float[] modelViewMatrix = modelViewMatrix_Vuforia.getData();
-            Matrix.translateM(modelViewMatrix, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
-                    (obj.centerZ + offset[2]) * 20);
-            Matrix.scaleM(modelViewMatrix, 0, OBJECT_SCALE_FLOAT,
-                    OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
-            float[] modelViewProjectionMatrix = new float[16];
-            Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrix, 0);
-            GLES20.glUseProgram(shaderProgramID);
-            GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                    false, 0, obj.cube.getVertices());
-            GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-                    false, 0, obj.cube.getNormals());
-            GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                    GLES20.GL_FLOAT, false, 0, obj.cube.getTexCoords());
-            GLES20.glEnableVertexAttribArray(vertexHandle);
-            GLES20.glEnableVertexAttribArray(normalHandle);
-            GLES20.glEnableVertexAttribArray(textureCoordHandle);
-            GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                    mTextures.get(obj.textureId).mTextureID[0]);
-            GLES20.glUniform1i(texSampler2DHandle, 0);
-            GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                    modelViewProjectionMatrix, 0);
-            GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                    obj.cube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                    obj.cube.getIndices());
-            GLES20.glDisableVertexAttribArray(vertexHandle);
-            GLES20.glDisableVertexAttribArray(normalHandle);
-            GLES20.glDisableVertexAttribArray(textureCoordHandle);
-            SampleUtils.checkGLError("Render Frame");
+    private void multiply(float [][]tempMatrix, float[][]a, int r1,int c1,float[][]b,int r2,int c2)
+    {
+        for (int i=0;i<r1;i++)
+            for (int j=0 ;j<c2;j++) {
+                tempMatrix[i][j] = 0;
+                for (int k = 0; k < c1; k++) {
+                    tempMatrix[i][j] +=a[i][k]*b[k][j];
+                }
+            }
+    }
+
+
+
+    private double getSlopingAngle(float[] bottomModelViewMatrix, float[] boardModelViewMatrix) {
+        double[] bottomAngleList = getPlaneAngle(bottomModelViewMatrix);
+        double[] boardAngleList = getPlaneAngle(boardModelViewMatrix);
+
+
+        double boardBottomAngle = Math.acos(bottomAngleList[0] * boardAngleList[0] +
+                bottomAngleList[1] * boardAngleList[1] +
+                bottomAngleList[2] * boardAngleList[2]);
+
+        double cosBoardBottomAngle = bottomAngleList[0] * boardAngleList[0] +
+                bottomAngleList[1] * boardAngleList[1] +
+                bottomAngleList[2] * boardAngleList[2];
+        if (cosBoardBottomAngle > 1 || cosBoardBottomAngle < -1) boardBottomAngle = Math.PI;
+
+        boardBottomAngle = boardBottomAngle / Math.PI * 180;
+        return boardBottomAngle;
+    }
+    public final static int ON_BOARD = 1;
+    public final static int ON_BOTTOM = 2;
+    public final static int ON_BOTTOM_GRID = 3;
+
+
+    private void render3DObject(float[] modelViewMatrix, float[] projectionMatrix, Object3D obj, int mode) {
+        float[] modelViewMatrixCopy = modelViewMatrix.clone();
+        List<float[]> boardOrBottomOffsetList = new ArrayList<>();
+        float boardOrBottomCenterX = 0.0f;
+        float boardOrBottomCenterY = 0.0f;
+        float boardOrBottomCenterZ = 0.0f;
+        float[] boardOrBottomSelfRotationMatrix = new float[16];
+
+        switch (mode){
+            case ON_BOARD:
+                boardOrBottomOffsetList = new ArrayList<>(obj.boardOffsetList);
+                boardOrBottomCenterX = obj.boardCenterX;
+                boardOrBottomCenterY = obj.boardCenterY;
+                boardOrBottomCenterZ = obj.boardCenterZ;
+                boardOrBottomSelfRotationMatrix= obj.onBoardSelfRotationMatrix;
+                break;
+            case ON_BOTTOM:
+                boardOrBottomOffsetList = new ArrayList<>(obj.bottomOffsetList);
+                boardOrBottomCenterX = obj.bottomCenterX;
+                boardOrBottomCenterY = obj.bottomCenterY;
+                boardOrBottomCenterZ = obj.bottomCenterZ;
+                boardOrBottomSelfRotationMatrix = obj.onBottomSelfRotationMatrix;
+                break;
+            case ON_BOTTOM_GRID:
+                break;
+
+        }
+        if(mode == ON_BOTTOM_GRID)
+            for (int[] offset :obj.offsetList){
+                Matrix.translateM(modelViewMatrixCopy, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
+                        (obj.centerZ + offset[2]) * 20);
+                Matrix.scaleM(modelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
+                        OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
+
+                float[] modelViewProjectionMatrix = new float[16];
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrixCopy, 0);
+                GLES20.glUseProgram(shaderProgramID);
+                GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
+                        false, 0, obj.cube.getVertices());
+                GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+                        false, 0, obj.cube.getNormals());
+                GLES20.glVertexAttribPointer(textureCoordHandle, 2,
+                        GLES20.GL_FLOAT, false, 0, obj.cube.getTexCoords());
+                GLES20.glEnableVertexAttribArray(vertexHandle);
+                GLES20.glEnableVertexAttribArray(normalHandle);
+                GLES20.glEnableVertexAttribArray(textureCoordHandle);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+                        mTextures.get(obj.textureId).mTextureID[0]);
+                GLES20.glUniform1i(texSampler2DHandle, 0);
+                GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
+                        modelViewProjectionMatrix, 0);
+                GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+                        obj.cube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                        obj.cube.getIndices());
+                GLES20.glDisableVertexAttribArray(vertexHandle);
+                GLES20.glDisableVertexAttribArray(normalHandle);
+                GLES20.glDisableVertexAttribArray(textureCoordHandle);
+                SampleUtils.checkGLError("Render Frame");
+            }
+        else{
+            for (float[] offset :boardOrBottomOffsetList){
+
+                    float[][] floatCoords = new float[4][1];
+                floatCoords[0][0] = offset[0];
+                floatCoords[1][0] = offset[1];
+                floatCoords[2][0] = offset[2];
+                floatCoords[3][0] = 1;
+                float[][] temp = new float[4][4];
+
+                for(int i = 0 ; i < 4; i ++)
+                {
+                    for(int j = 0 ; j < 4; j ++)
+                    {
+                        temp[i][j] = boardOrBottomSelfRotationMatrix[j*4 + i];
+                    }
+                }
+            //    Matrix.setIdentityM(temp,0);
+
+//             temp[0][0] = 0.707f;
+//                temp[1][0] = 0.707f;
+//                temp[0][1] = -0.707f;
+//                temp[1][1] = 0.707f;
+//                temp[2][2] = 1;
+//                temp[3][3] = 1;
+
+                float[][] result = new float[4][1];
+                multiply(result, temp, 4, 4, floatCoords, 4, 1);
+                float[] newOffset = new float[3];
+                newOffset[0] = result[0][0];
+                newOffset[1] = result[1][0];
+                newOffset[2] = result[2][0];
+                Log.i(LOGTAG,"Offset:" + newOffset[0] + "," + newOffset[1] + "," + newOffset[2]);
+
+
+
+
+                Matrix.translateM(modelViewMatrixCopy, 0, boardOrBottomCenterX + newOffset[0] , boardOrBottomCenterY + newOffset[1] ,
+                        boardOrBottomCenterZ + newOffset[2]);
+                Matrix.scaleM(modelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
+                        OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
+                float[] tempMatrix = new float[16];
+                //tempMatrix = modelViewMatrixCopy;
+                Matrix.multiplyMM(tempMatrix, 0, modelViewMatrixCopy, 0, boardOrBottomSelfRotationMatrix, 0);
+                float[] modelViewProjectionMatrix = new float[16];
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, tempMatrix, 0);
+                GLES20.glUseProgram(shaderProgramID);
+                GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
+                        false, 0, obj.cube.getVertices());
+                GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+                        false, 0, obj.cube.getNormals());
+                GLES20.glVertexAttribPointer(textureCoordHandle, 2,
+                        GLES20.GL_FLOAT, false, 0, obj.cube.getTexCoords());
+                GLES20.glEnableVertexAttribArray(vertexHandle);
+                GLES20.glEnableVertexAttribArray(normalHandle);
+                GLES20.glEnableVertexAttribArray(textureCoordHandle);
+                GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+                GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+                        mTextures.get(obj.textureId).mTextureID[0]);
+                GLES20.glUniform1i(texSampler2DHandle, 0);
+                GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
+                        modelViewProjectionMatrix, 0);
+                GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+                        obj.cube.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                        obj.cube.getIndices());
+                GLES20.glDisableVertexAttribArray(vertexHandle);
+                GLES20.glDisableVertexAttribArray(normalHandle);
+                GLES20.glDisableVertexAttribArray(textureCoordHandle);
+                SampleUtils.checkGLError("Render Frame");
+            }
         }
     }
 
@@ -462,7 +698,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     private void printUserData(Trackable trackable)
     {
         String userData = (String) trackable.getUserData();
-        Log.d(LOGTAG, "UserData:Retreived User Data	\"" + userData + "\"");
+//        Log.d(LOGTAG, "UserData:Retreived User Data	\"" + userData + "\"");
     }
 
 
@@ -472,31 +708,49 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     }
 
-//    private boolean isNotIntersected(int i,float X_temp,float Y_temp)
-//    {
-//        for(int m=0;m< objectList.size();m++)
-//        {
-//            if(m==i) continue;
-//            else if(objectList.get(m).isSticked == objectList.get(i).isSticked) continue;
-//            else {
-//                if (isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
-//                        || isInBox(m, X_temp - CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2)
-//                        || isInBox(m, X_temp + CUBE_SIDE / 2, Y_temp - CUBE_SIDE / 2)
-//                        || isInBox(m, X_temp + CUBE_SIDE / 2, Y_temp + CUBE_SIDE / 2))
-//                    return false;
-//            }
-//        }
-//
-//        return true;
-//    }
 
-//    private boolean isInBox(int i,float curX,float curY)
-//    {
-//        if(curX>objectList.get(i).X -CUBE_SIDE/2 && curX<objectList.get(i).X+CUBE_SIDE/2
-//                && curY>objectList.get(i).Y-CUBE_SIDE/2 && curY<objectList.get(i).Y+CUBE_SIDE/2)
-//            return true;
-//        else return false;
-//    }
+
+    void renderTeapot(float[] modelViewProjection, int textureIndex)
+    {
+        Teapot mTeapot = new Teapot();
+        // activate the shader program and bind the vertex/normal/tex coords
+        GLES20.glUseProgram(shaderProgramID);
+
+        GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
+                false, 0, mTeapot.getVertices());
+        GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
+                false, 0, mTeapot.getNormals());
+        GLES20.glVertexAttribPointer(textureCoordHandle, 2,
+                GLES20.GL_FLOAT, false, 0, mTeapot.getTexCoords());
+
+        GLES20.glEnableVertexAttribArray(vertexHandle);
+        GLES20.glEnableVertexAttribArray(normalHandle);
+        GLES20.glEnableVertexAttribArray(textureCoordHandle);
+
+        // activate texture 0, bind it, and pass to shader
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
+                mTextures.get(textureIndex).mTextureID[0]);
+        GLES20.glUniform1i(texSampler2DHandle, 0);
+
+        // pass the model view matrix to the shader
+        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
+                modelViewProjection, 0);
+
+        // finally draw the teapot
+        GLES20.glDrawElements(GLES20.GL_TRIANGLES,
+                mTeapot.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
+                mTeapot.getIndices());
+
+        // disable the enabled arrays
+        GLES20.glDisableVertexAttribArray(vertexHandle);
+        GLES20.glDisableVertexAttribArray(normalHandle);
+        GLES20.glDisableVertexAttribArray(textureCoordHandle);
+//        Matrix.invertM()
+    }
+
+
+
 
     private double[] Mat2Quat(float[][] R) {
 
@@ -545,44 +799,68 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         return Quat;
     }
 
-
-
-    void renderTeapot(float[] modelViewProjection, int textureIndex)
+    double[] getPlaneAngle(float[] modelViewMatrix)
     {
-        Teapot mTeapot = new Teapot();
-        // activate the shader program and bind the vertex/normal/tex coords
-        GLES20.glUseProgram(shaderProgramID);
+        double[] angle_degree=new double[3];
 
-        GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
-                false, 0, mTeapot.getVertices());
-        GLES20.glVertexAttribPointer(normalHandle, 3, GLES20.GL_FLOAT,
-                false, 0, mTeapot.getNormals());
-        GLES20.glVertexAttribPointer(textureCoordHandle, 2,
-                GLES20.GL_FLOAT, false, 0, mTeapot.getTexCoords());
+        float[][] mat=new float[3][3];
+        for(int index_row=0;index_row<=2;index_row++)
+            for(int index_col=0;index_col<=2;index_col++)
+            {
+                mat[index_row][index_col]=modelViewMatrix[index_col*4+index_row];
+            }
+        //旋转矩阵求四元数
+        double[] Quat=new double[4];
+        Quat = Mat2Quat(mat);
 
-        GLES20.glEnableVertexAttribArray(vertexHandle);
-        GLES20.glEnableVertexAttribArray(normalHandle);
-        GLES20.glEnableVertexAttribArray(textureCoordHandle);
+        double q0 = Quat[0];
+        double q1=Quat[1];
+        double q2=Quat[2];
+        double q3=Quat[3];
+        double fi,theta,thi;
+        //四元数算和平面夹角
+        fi=Math.atan2(2 * (q0 * q1 + q2 * q3), 1 - 2 * (q1 * q1 + q2 * q2));
+        theta=Math.asin(2 * (q0 * q2 - q3 * q1));
+        thi=Math.atan2(2 * (q0 * q3 + q1 * q2), 1 - 2 * (q2 * q2 + q3 * q3));
 
-        // activate texture 0, bind it, and pass to shader
-        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                mTextures.get(textureIndex).mTextureID[0]);
-        GLES20.glUniform1i(texSampler2DHandle, 0);
+        double fi_temp=fi/Math.PI*180;
+        double theta_temp=theta/Math.PI*180;
 
-        // pass the model view matrix to the shader
-        GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
-                modelViewProjection, 0);
+        if(fi<0) fi+=Math.PI;
+        else fi-=Math.PI;
 
-        // finally draw the teapot
-        GLES20.glDrawElements(GLES20.GL_TRIANGLES,
-                mTeapot.getNumObjectIndex(), GLES20.GL_UNSIGNED_SHORT,
-                mTeapot.getIndices());
+        double cos_angle;
 
-        // disable the enabled arrays
-        GLES20.glDisableVertexAttribArray(vertexHandle);
-        GLES20.glDisableVertexAttribArray(normalHandle);
-        GLES20.glDisableVertexAttribArray(textureCoordHandle);
-//        Matrix.invertM()
+        if((1-Math.cos(Math.PI/2-fi)*Math.cos(Math.PI/2-fi)-Math.cos(Math.PI/2-theta)*Math.cos(Math.PI/2-theta))<0)
+            cos_angle=0.0f;
+        else
+            cos_angle=Math.sqrt(1 - Math.cos(Math.PI / 2 - fi) * Math.cos(Math.PI / 2 - fi) - Math.cos(Math.PI / 2 - theta) * Math.cos(Math.PI / 2 - theta));
+
+        angle_degree[0]=Math.cos(Math.PI / 2 - fi);
+        angle_degree[1]=Math.cos(Math.PI / 2 - theta);
+        angle_degree[2]=cos_angle;
+
+        fi=fi/Math.PI*180;
+        theta=theta/Math.PI*180;
+
+        return angle_degree;
+    }
+
+    private float[] getRotationMatrix(float[] modelViewMatrix)
+    {
+        float[] temp=new float[16];
+        Matrix.setIdentityM(temp, 0);
+
+        temp[0]=modelViewMatrix[0];
+        temp[1]=modelViewMatrix[1];
+        temp[2]=modelViewMatrix[2];
+        temp[4]=modelViewMatrix[4];
+        temp[5]=modelViewMatrix[5];
+        temp[6]=modelViewMatrix[6];
+        temp[8]=modelViewMatrix[8];
+        temp[9]=modelViewMatrix[9];
+        temp[10]=modelViewMatrix[10];
+
+        return temp;
     }
 }

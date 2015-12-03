@@ -12,5 +12,15 @@ public class AutoObject extends Object3D{
         List<int[]> autoOffsetList =new ArrayList<int[]>();
         autoOffsetList.add(new int[]{0, 0, 0});
         this.offsetList = autoOffsetList;
+
+        List<float[]> onBoardOffsetList =new ArrayList<float[]>();
+        onBoardOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
+        this.boardOffsetList = onBoardOffsetList;
+
+
+        List<float[]> onBottomOffsetList =new ArrayList<float[]>();
+        onBottomOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
+        this.bottomOffsetList =onBottomOffsetList;
+
     }
 }

@@ -16,6 +16,25 @@ public class LongStickObject extends Object3D {
         longStickOffsetList.add(new int[]{0, 0, 3});
         longStickOffsetList.add(new int[]{0, 0, 4});
         this.offsetList = longStickOffsetList;
+
+
+        List<float[]> onBoardOffsetList =new ArrayList<float[]>();
+        onBoardOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
+        onBoardOffsetList.add(new float[]{0, 0, 1});
+        onBoardOffsetList.add(new float[]{0, 0, 2});
+        onBoardOffsetList.add(new float[]{0, 0, 3});
+        onBoardOffsetList.add(new float[]{0, 0, 4});
+        this.boardOffsetList = onBoardOffsetList;
+
+
+        List<float[]> onBottomOffsetList =new ArrayList<float[]>();
+        onBottomOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
+        onBottomOffsetList.add(new float[]{0, 0, 1});
+        onBottomOffsetList.add(new float[]{0, 0, 2});
+        onBottomOffsetList.add(new float[]{0, 0, 3});
+        onBottomOffsetList.add(new float[]{0, 0, 4});
+        this.bottomOffsetList =onBottomOffsetList;
+
     }
 
 }
