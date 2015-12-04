@@ -487,6 +487,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 boardOrBottomCenterY = obj.boardCenterY;
                 boardOrBottomCenterZ = obj.boardCenterZ;
                 boardOrBottomSelfRotationMatrix= obj.onBoardSelfRotationMatrix.clone();
+                boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBoardSelfRotationMatrix).clone();
                 break;
             case ON_BOTTOM:
                 boardOrBottomOffsetList = new ArrayList<>(obj.bottomOffsetList);
@@ -494,6 +495,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 boardOrBottomCenterY = obj.bottomCenterY;
                 boardOrBottomCenterZ = obj.bottomCenterZ;
                 boardOrBottomSelfRotationMatrix = obj.onBottomSelfRotationMatrix.clone();
+                boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBottomSelfRotationMatrix).clone();
                 break;
             case ON_BOTTOM_GRID:
                 break;
@@ -847,5 +849,85 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         temp[10]=modelViewMatrix[10];
 
         return temp;
+    }
+
+    float[] getGridRotationMatrix(float[] rotationMatrix)
+    {
+        double cosThetaX=rotationMatrix[0]/Math.sqrt(rotationMatrix[0] * rotationMatrix[0]
+                +rotationMatrix[1]*rotationMatrix[1]+rotationMatrix[2]*rotationMatrix[2]);
+        double cosThetaY=rotationMatrix[5]/Math.sqrt(rotationMatrix[4] * rotationMatrix[4]
+                +rotationMatrix[5]*rotationMatrix[5]+rotationMatrix[6]*rotationMatrix[6]);
+        double cosThetaZ=rotationMatrix[10]/Math.sqrt(rotationMatrix[8] * rotationMatrix[8]
+                +rotationMatrix[9]*rotationMatrix[9]+rotationMatrix[10]*rotationMatrix[10]);
+
+        boolean[] axisIsTaken=new boolean[6];
+        float[]  destAxisX= getGridAxisVector(rotationMatrix[0], rotationMatrix[1], rotationMatrix[2],axisIsTaken);
+        axisIsTaken = getNewAxisIsTaken(axisIsTaken, destAxisX);
+        float[]  destAxisY = getGridAxisVector(rotationMatrix[4],rotationMatrix[5],rotationMatrix[6],axisIsTaken);
+        axisIsTaken = getNewAxisIsTaken(axisIsTaken, destAxisY);
+        float[]  destAxisZ = getGridAxisVector(rotationMatrix[8],rotationMatrix[9],rotationMatrix[10],axisIsTaken);
+
+        float[] gridRotationMatrix=new float[16];
+        Matrix.setIdentityM(gridRotationMatrix,0);
+
+        gridRotationMatrix[0]=destAxisX[0];
+        gridRotationMatrix[1]=destAxisX[1];
+        gridRotationMatrix[2]=destAxisX[2];
+
+        gridRotationMatrix[4]=destAxisY[0];
+        gridRotationMatrix[5]=destAxisY[1];
+        gridRotationMatrix[6]=destAxisY[2];
+
+        gridRotationMatrix[8]=destAxisZ[0];
+        gridRotationMatrix[9]=destAxisZ[1];
+        gridRotationMatrix[10]=destAxisZ[2];
+
+        Log.i(LOGTAG,gridRotationMatrix[0]+" "+gridRotationMatrix[1]+" "+gridRotationMatrix[2]
+                +" "+gridRotationMatrix[4]+" "+gridRotationMatrix[5]+" "+gridRotationMatrix[6]
+                +" "+gridRotationMatrix[8]+" "+gridRotationMatrix[9]+" "+gridRotationMatrix[10]);
+
+        return gridRotationMatrix;
+    }
+
+    private boolean[] getNewAxisIsTaken(boolean[] axisIsTaken, float[] destAxis) {
+        if(destAxis[0]!=0) {
+            axisIsTaken[0] = true;
+            axisIsTaken[1] = true;
+        }
+        else if(destAxis[1]!=0) {
+            axisIsTaken[2] = true;
+            axisIsTaken[3] = true;
+        }
+        else
+        {
+            axisIsTaken[4] = true;
+            axisIsTaken[5] = true;
+        }
+        return axisIsTaken;
+    }
+
+    float[] getGridAxisVector(float x,float y,float z,boolean[] axisIsTaken)
+    {
+        float max=-2;
+        float[] destAxisVector=new float[3];
+        double length=Math.sqrt(x*x+y*y+z*z);
+
+        if(!axisIsTaken[0] && !axisIsTaken[1])
+        {
+            if(x*1.0/length>max) {destAxisVector[0]=1;destAxisVector[1]=0;destAxisVector[2]=0;max=x;}
+            if(-x*1.0/length>max) {destAxisVector[0]=-1;destAxisVector[1]=0;destAxisVector[2]=0;max=-x;}
+        }
+        if(!axisIsTaken[2] && !axisIsTaken[3])
+        {
+            if(y*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=1;destAxisVector[2]=0;max=y;}
+            if(-y*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=-1;destAxisVector[2]=0;max=-y;}
+        }
+        if(!axisIsTaken[4] && !axisIsTaken[5])
+        {
+            if(z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[244]=1;max=z;}
+            if(-z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[2]=-1;max=-z;}
+        }
+
+        return destAxisVector;
     }
 }
