@@ -49,6 +49,7 @@ public class Object3D {
     public boolean isFalling = false;
     public boolean isMoved = false;
     public int  moveCount = 0;
+    public int fallCount = 0;
 
 
     private float[] getRotationMatrix(float[] modelViewMatrix)

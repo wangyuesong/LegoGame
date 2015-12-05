@@ -383,8 +383,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
 //                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
 
-                    if (currentZ - 1 > 0)
-                        fallingObject.bottomCenterZ = currentZ - 1;
+                    if(fallingObject.fallCount==60) {
+                        if (currentZ - 1 > 0) {
+                            fallingObject.bottomCenterZ = currentZ - 20;
+                            fallingObject.fallCount = 0;
+                        }
+                    }
+                    else
+                    {
+                        fallingObject.bottomCenterZ=currentZ;
+                        fallingObject.fallCount++;
+                    }
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
                 }
@@ -393,8 +402,13 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.isMoved = false;
                     fallingObject.moveCount = 50;
 
-                    if (fallingObject.bottomCenterZ - 1 > 0)
-                        fallingObject.bottomCenterZ -= 1;
+                    if(fallingObject.fallCount==60) {
+                        if (fallingObject.bottomCenterZ - 1 > 0) {
+                            fallingObject.bottomCenterZ -= 20;
+                            fallingObject.fallCount = 0;
+                        }
+                    }
+                    else fallingObject.fallCount++;
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
@@ -424,8 +438,13 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
 
-            if (fallingObject.bottomCenterZ - 1 > 0)
-                fallingObject.bottomCenterZ -= 1;
+            if(fallingObject.fallCount==60) {
+                if (fallingObject.bottomCenterZ - 1 > 0) {
+                    fallingObject.bottomCenterZ -= 20;
+                    fallingObject.fallCount = 0;
+                }
+            }
+            else fallingObject.fallCount++;
 
             render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
             Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
