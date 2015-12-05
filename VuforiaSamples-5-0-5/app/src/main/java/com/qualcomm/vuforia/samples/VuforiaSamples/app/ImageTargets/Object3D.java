@@ -3,6 +3,7 @@ package com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets;
 
 import android.graphics.CornerPathEffect;
 import android.opengl.Matrix;
+import android.util.Log;
 
 import com.qualcomm.vuforia.samples.SampleApplication.utils.CubeObject;
 
@@ -11,6 +12,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+import android.opengl.Matrix;
+import android.util.Log;
 
 /**
  * Created by yuesongwang on 11/29/15.
@@ -96,14 +102,45 @@ public class Object3D {
 
     public void updateBottomXYZ(float[] boardToBottomModelViewMatrix)
     {
-        float[] temp = convert(boardToBottomModelViewMatrix,new float[]{boardCenterX,boardCenterY,boardCenterZ});
-        bottomCenterX = temp[0];
-        bottomCenterY = temp[1];
-        bottomCenterZ = temp[2];
+        float[] temp = convert(boardToBottomModelViewMatrix, new float[]{boardCenterX, boardCenterY, boardCenterZ});
+        float[] temp2 = getWithinBorderCoordinate(temp);
+        //float[] result=temp.clone();
+        float[] result = getInGridCoordinate(temp2);
+        bottomCenterX = result[0];
+        bottomCenterY = result[1];
+        bottomCenterZ = result[2];
+
         //Offset only rotate
 //        for(int i = 0; i < boardOffsetList.size(); i ++)
 //            bottomOffsetList.set(i, convert(getRotationMatrix(boardToBottomModelViewMatrix), boardOffsetList.get(i)));
 
+    }
+
+    private float[] getInGridCoordinate(float[] inputCoordinate)
+    {
+        float[] outputCoordinate=new float[3];
+
+        outputCoordinate[0] = Math.round(inputCoordinate[0]/20)*20;
+        outputCoordinate[1] = Math.round(inputCoordinate[1]/20)*20;
+        outputCoordinate[2] = Math.round(inputCoordinate[2]/20)*20;
+
+        return outputCoordinate;
+    }
+
+    private float[] getWithinBorderCoordinate(float[] inputCoordinate)
+    {
+        float[] outputCoordinate=new float[3];
+        if(inputCoordinate[0]<-120) outputCoordinate[0]=-120;
+        else if(inputCoordinate[0]>120) outputCoordinate[0]=120;
+        else outputCoordinate[0]=inputCoordinate[0];
+
+        if(inputCoordinate[1]<-80) outputCoordinate[1]=-80;
+        else if(inputCoordinate[1]>80) outputCoordinate[1]=80;
+        else outputCoordinate[1]=inputCoordinate[1];
+
+        outputCoordinate[2]=inputCoordinate[2];
+
+        return outputCoordinate;
     }
 
     public void updateBottomOffset(float[] boardToBottomModelViewMatrix){

@@ -348,6 +348,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 if (slopingAngle > 90) {
                     //Fall from board to bottom, change coordinate system
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
+                    Log.i(LOGTAG, fallingObject.bottomCenterX + " " + fallingObject.bottomCenterY + " " + fallingObject.bottomCenterZ);
                     fallingObject.isFalling = true;
                 }
                 else {
@@ -381,6 +382,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     float currentZ = fallingObject.bottomCenterZ;
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
 //                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
+
                     if (currentZ - 1 > 0)
                         fallingObject.bottomCenterZ = currentZ - 1;
 
@@ -924,7 +926,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         }
         if(!axisIsTaken[4] && !axisIsTaken[5])
         {
-            if(z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[244]=1;max=z;}
+            if(z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[2]=1;max=z;}
             if(-z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[2]=-1;max=-z;}
         }
 
