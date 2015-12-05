@@ -16,13 +16,13 @@ public class ShortStickObject extends Object3D {
 
         List<float[]> onBoardOffsetList =new ArrayList<float[]>();
         onBoardOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
-        onBoardOffsetList.add(new float[]{0, 0, 20.f});
+        onBoardOffsetList.add(new float[]{0, 0, 1.f});
         this.boardOffsetList = onBoardOffsetList;
 
 
         List<float[]> onBottomOffsetList =new ArrayList<float[]>();
         onBottomOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
-        onBottomOffsetList.add(new float[]{0, 0, 20.f});
+        onBottomOffsetList.add(new float[]{0, 0, 1.f});
         this.bottomOffsetList =onBottomOffsetList;
 
     }

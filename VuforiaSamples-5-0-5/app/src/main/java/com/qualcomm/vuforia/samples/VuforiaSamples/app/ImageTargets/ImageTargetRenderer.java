@@ -312,6 +312,15 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
         float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
+        if(modelViewMap.containsKey("stones"))
+        {
+            for(Object3D obj: objectList)
+            {
+                render3DObject(modelViewMap.get("stones").getData(),projectionMatrix,obj,ON_BOTTOM_GRID);
+            }
+        }
+
+
 
         if(modelViewMap.containsKey("chips") && modelViewMap.containsKey("stones")) {
             float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
@@ -525,13 +534,15 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         }
         if(mode == ON_BOTTOM_GRID)
             for (int[] offset :obj.offsetList){
-                Matrix.translateM(modelViewMatrixCopy, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
+                float[] newModelViewMatrixCopy  = modelViewMatrixCopy.clone();
+
+                Matrix.translateM(newModelViewMatrixCopy, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
                         (obj.centerZ + offset[2]) * 20);
-                Matrix.scaleM(modelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
+                Matrix.scaleM(newModelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
                         OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
 
                 float[] modelViewProjectionMatrix = new float[16];
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrixCopy, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, newModelViewMatrixCopy, 0);
                 GLES20.glUseProgram(shaderProgramID);
                 GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
                         false, 0, obj.cube.getVertices());
