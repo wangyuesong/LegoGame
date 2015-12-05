@@ -259,7 +259,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         int[] countlevel = new int[10];
 
         count ++;
-        if (count == 10) {
+        if (count == 20) {
             count = 0;
             for (int i = 1; i < objectList.size(); i++) {
                 if (objectList.get(i).detectCollision(objectList.get(0))) {
@@ -273,7 +273,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         }
 
         ((PileObject) objectList.get(0)).elimate();
-        if(addObject == 100) {
+        if(addObject == 200) {
             addObject = 0;
             randomfalldown = (int) (Math.floor(Math.random() * 4) +0);
             switch (randomfalldown) {
@@ -312,6 +312,13 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
         float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
+        if(modelViewMap.containsKey("stones"))
+        {
+            for(Object3D obj: objectList)
+            {
+                render3DObject(modelViewMap.get("stones").getData(),projectionMatrix,obj,ON_BOTTOM_GRID);
+            }
+        }
 
         if(modelViewMap.containsKey("chips") && modelViewMap.containsKey("stones")) {
             float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
@@ -432,6 +439,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
         }
 
+
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         mRenderer.end();
     }
@@ -497,17 +505,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 break;
             case ON_BOTTOM_GRID:
                 break;
-
         }
         if(mode == ON_BOTTOM_GRID)
             for (int[] offset :obj.offsetList){
-                Matrix.translateM(modelViewMatrixCopy, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
+                float[] newModelViewMatrixCopy  = modelViewMatrixCopy.clone();
+                Matrix.translateM(newModelViewMatrixCopy, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
                         (obj.centerZ + offset[2]) * 20);
-                Matrix.scaleM(modelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
+                Matrix.scaleM(newModelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
                         OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
 
                 float[] modelViewProjectionMatrix = new float[16];
-                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, modelViewMatrixCopy, 0);
+                Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, newModelViewMatrixCopy, 0);
                 GLES20.glUseProgram(shaderProgramID);
                 GLES20.glVertexAttribPointer(vertexHandle, 3, GLES20.GL_FLOAT,
                         false, 0, obj.cube.getVertices());
