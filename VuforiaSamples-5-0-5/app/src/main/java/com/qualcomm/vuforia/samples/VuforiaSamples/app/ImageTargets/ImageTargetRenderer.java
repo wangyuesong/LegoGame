@@ -389,6 +389,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                             fallingObject.fallCount = 0;
                         }
                     }
+                    
                     else
                     {
                         fallingObject.bottomCenterZ=currentZ;
