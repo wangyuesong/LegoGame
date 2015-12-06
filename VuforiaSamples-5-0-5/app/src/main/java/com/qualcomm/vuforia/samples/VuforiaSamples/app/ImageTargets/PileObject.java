@@ -9,13 +9,17 @@ import java.util.List;
  */
 public class PileObject extends Object3D {
 
-    public void mergeAnObject(Object3D other)
-    {
-        for (int i =0; i<other.offsetList.size();i++)
-        {
-         this.offsetList.add(new int[]{other.centerX+other.offsetList.get(i)[0],
-                other.centerY + other.offsetList.get(i)[1],
-                other.centerZ + other.offsetList.get(i)[2]});
+    public void mergeAnObject(Object3D other) {
+//        for (int i =0; i<other.offsetList.size();i++)
+//        {
+//         this.offsetList.add(new int[]{other.centerX+other.offsetList.get(i)[0],
+//                other.centerY + other.offsetList.get(i)[1],
+//                other.centerZ + other.offsetList.get(i)[2]});
+//        }
+        for (int i = 0; i < other.bottomOffsetList.size(); i++) {
+            this.offsetList.add(new int[]{(int) (other.bottomCenterX/20 + other.bottomOffsetList.get(i)[0]),
+                    (int) (other.bottomCenterY/20 + other.bottomOffsetList.get(i)[1]),
+                    (int) (other.bottomCenterZ/20 + other.bottomOffsetList.get(i)[2])});
         }
     }
     public void elimate(){

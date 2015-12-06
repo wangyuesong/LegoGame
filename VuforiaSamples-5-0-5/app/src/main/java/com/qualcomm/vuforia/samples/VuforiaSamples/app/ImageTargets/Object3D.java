@@ -111,10 +111,18 @@ public class Object3D {
         bottomCenterY = result[1];
         bottomCenterZ = result[2];
 
+        updateBottomOffsetList();
+
         //Offset only rotate
 //        for(int i = 0; i < boardOffsetList.size(); i ++)
 //            bottomOffsetList.set(i, convert(getRotationMatrix(boardToBottomModelViewMatrix), boardOffsetList.get(i)));
 
+    }
+
+    public void updateBottomOffsetList()
+    {
+        for(int i = 0; i < boardOffsetList.size(); i ++)
+        bottomOffsetList.set(i, convert(onBottomSelfRotationMatrix, boardOffsetList.get(i)));
     }
 
     private float[] getInGridCoordinate(float[] inputCoordinate)
@@ -131,23 +139,25 @@ public class Object3D {
     private float[] getWithinBorderCoordinate(float[] inputCoordinate)
     {
         float[] outputCoordinate=new float[3];
-        if(inputCoordinate[0]<-120) outputCoordinate[0]=-120;
-        else if(inputCoordinate[0]>120) outputCoordinate[0]=120;
+        if(inputCoordinate[0]<-100) outputCoordinate[0]=-100;
+        else if(inputCoordinate[0]>100) outputCoordinate[0]=100;
         else outputCoordinate[0]=inputCoordinate[0];
 
-        if(inputCoordinate[1]<-80) outputCoordinate[1]=-80;
-        else if(inputCoordinate[1]>80) outputCoordinate[1]=80;
+        if(inputCoordinate[1]<-60) outputCoordinate[1]=-60;
+        else if(inputCoordinate[1]>60) outputCoordinate[1]=60;
         else outputCoordinate[1]=inputCoordinate[1];
 
-        outputCoordinate[2]=inputCoordinate[2];
+        if(inputCoordinate[2]>180 || inputCoordinate[2]<0) outputCoordinate[2]=180;
+        else outputCoordinate[2]=inputCoordinate[2];
 
         return outputCoordinate;
     }
 
-    public void updateBottomOffset(float[] boardToBottomModelViewMatrix){
-        for(int i = 0; i < bottomOffsetList.size(); i ++)
-            bottomOffsetList.set(i,convert(boardToBottomModelViewMatrix, boardOffsetList.get(i)));
-    }
+//
+//    public void updateBottomOffset(float[] boardToBottomModelViewMatrix){
+//        for(int i = 0; i < bottomOffsetList.size(); i ++)
+//            bottomOffsetList.set(i,convert(boardToBottomModelViewMatrix, boardOffsetList.get(i)));
+//    }
 
 
 
@@ -192,19 +202,43 @@ public class Object3D {
 
     public void down(Object3D pile){
         if (!detectCollision(pile)&&centerZ!=0)
-         centerZ --;
+        {centerZ --; bottomCenterZ-=20;}
 
     }
 
 
     public boolean detectCollision(Object3D pileObject){
 
+//        HashMap<Integer,boolean[][]> pile = new HashMap<>();
+//        for(int i =0 ; i < 10; i ++)
+//        {
+//            boolean[][] level = new boolean[13][9];
+//            pile.put(i,level);
+//        }
+//        for(int[] oneOffset: pileObject.offsetList)
+//        {
+//            boolean[][] origin = pile.get(oneOffset[2]);
+//            origin[oneOffset[0]+6][oneOffset[1]+4]  = true;
+//            pile.put(oneOffset[2],origin);
+//        }
+//
+//        for(int[] oneOffset : offsetList)
+//        {
+//            if(centerZ -1+ oneOffset[2] < 0)
+//                continue;
+//            if(pile.get(centerZ -1+ oneOffset[2])[centerX + oneOffset[0] + 6][centerY + oneOffset[1] + 4])
+//                return true;
+//        }
+//        return false;
+
+
         HashMap<Integer,boolean[][]> pile = new HashMap<>();
-        for(int i =0 ; i < 10; i ++)
+        for(int i =0 ; i < 10; i++)
         {
             boolean[][] level = new boolean[13][9];
-            pile.put(i,level);
+            pile.put((int)i,level);
         }
+
         for(int[] oneOffset: pileObject.offsetList)
         {
             boolean[][] origin = pile.get(oneOffset[2]);
@@ -212,11 +246,11 @@ public class Object3D {
             pile.put(oneOffset[2],origin);
         }
 
-        for(int[] oneOffset : offsetList)
+        for(float[] oneOffset : bottomOffsetList)
         {
-            if(centerZ -1+ oneOffset[2] < 0)
+            if(bottomCenterZ/20 -1+ oneOffset[2] < 0)
                 continue;
-            if(pile.get(centerZ -1+ oneOffset[2])[centerX + oneOffset[0] + 6][centerY + oneOffset[1] + 4])
+            if(pile.get((int)(bottomCenterZ/20 -1+ oneOffset[2]))[(int)(bottomCenterX/20 + oneOffset[0] + 6)][(int)(bottomCenterY/20 + oneOffset[1] + 4)])
                 return true;
         }
         return false;

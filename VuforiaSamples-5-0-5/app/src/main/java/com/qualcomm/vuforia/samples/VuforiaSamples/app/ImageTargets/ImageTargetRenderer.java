@@ -225,9 +225,6 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         return pileObject;
     }
 
-    boolean hasSticked=false;
-    int thresholdDistance = 100;
-    int thresholdInterval = 50;
     int count =0;
     int up;
     private HashMap<Integer,boolean[][]> pile;
@@ -392,17 +389,18 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
 //                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
 
-                    if(fallingObject.fallCount==60) {
-                        if (currentZ - 1 > 0) {
-                            fallingObject.bottomCenterZ = currentZ - 20;
-                            fallingObject.fallCount = 0;
+                    if (fallingObject.detectCollision(objectList.get(0))) {
+                        ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                    }else {
+                        if(fallingObject.fallCount==60) {
+                                fallingObject.bottomCenterZ = currentZ - 20;
+                                fallingObject.fallCount = 0;
                         }
-                    }
-                    
-                    else
-                    {
-                        fallingObject.bottomCenterZ=currentZ;
-                        fallingObject.fallCount++;
+                        else
+                        {
+                            fallingObject.bottomCenterZ=currentZ;
+                            fallingObject.fallCount++;
+                        }
                     }
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
@@ -412,13 +410,15 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.isMoved = false;
                     fallingObject.moveCount = 50;
 
-                    if(fallingObject.fallCount==60) {
-                        if (fallingObject.bottomCenterZ - 1 > 0) {
-                            fallingObject.bottomCenterZ -= 20;
-                            fallingObject.fallCount = 0;
+                    if (fallingObject.detectCollision(objectList.get(0))) {
+                        ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                    }else {
+                        if(fallingObject.fallCount==60) {
+                                fallingObject.bottomCenterZ -= 20;
+                                fallingObject.fallCount = 0;
                         }
+                        else fallingObject.fallCount++;
                     }
-                    else fallingObject.fallCount++;
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
@@ -434,6 +434,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             Matrix.multiplyMM(fallingObject.onBottomSelfRotationMatrix, 0
                     , getRotationMatrix(boardToBottomModelViewMatrix), 0
                     , fallingObject.onBoardSelfRotationMatrix, 0);
+            fallingObject.onBottomSelfRotationMatrix = getGridRotationMatrix(fallingObject.onBottomSelfRotationMatrix).clone();
             //fallingObject.updateBottomOffset(getRotationMatrix(boardToBottomModelViewMatrix));
         }
 //
@@ -448,14 +449,15 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
 
-            if(fallingObject.fallCount==60) {
-                if (fallingObject.bottomCenterZ - 1 > 0) {
+            if (fallingObject.detectCollision(objectList.get(0))) {
+                ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+            }else {
+                if(fallingObject.fallCount==60) {
                     fallingObject.bottomCenterZ -= 20;
                     fallingObject.fallCount = 0;
                 }
+                else fallingObject.fallCount++;
             }
-            else fallingObject.fallCount++;
-
             render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
             Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
             Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
@@ -521,12 +523,12 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBoardSelfRotationMatrix).clone();
                 break;
             case ON_BOTTOM:
-                boardOrBottomOffsetList = new ArrayList<>(obj.bottomOffsetList);
+                boardOrBottomOffsetList = new ArrayList<>(obj.boardOffsetList);
                 boardOrBottomCenterX = obj.bottomCenterX;
                 boardOrBottomCenterY = obj.bottomCenterY;
                 boardOrBottomCenterZ = obj.bottomCenterZ;
                 boardOrBottomSelfRotationMatrix = obj.onBottomSelfRotationMatrix.clone();
-                boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBottomSelfRotationMatrix).clone();
+                //boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBottomSelfRotationMatrix).clone();
                 break;
             case ON_BOTTOM_GRID:
                 break;
