@@ -385,11 +385,20 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 //When the object is being pushed
                 if (distance < 250 && fallingObject.isMoved && fallingObject.moveCount < 50) {
                     fallingObject.moveCount++;
+                    float currentX = fallingObject.bottomCenterZ;
+                    float currentY = fallingObject.bottomCenterZ;
                     float currentZ = fallingObject.bottomCenterZ;
+
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
 //                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
 
-                    if (fallingObject.detectCollision(objectList.get(0))) {
+                    if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
+                        fallingObject.bottomCenterX=currentX;
+                        fallingObject.bottomCenterY=currentY;
+                        fallingObject.bottomCenterZ=currentZ;
+
+                        fallingObject.isOnGround=true;
+
                         ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
                     }else {
                         if(fallingObject.fallCount==60) {
@@ -410,8 +419,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.isMoved = false;
                     fallingObject.moveCount = 50;
 
-                    if (fallingObject.detectCollision(objectList.get(0))) {
+                    if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
                         ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                        fallingObject.isOnGround = true;
                     }else {
                         if(fallingObject.fallCount==60) {
                                 fallingObject.bottomCenterZ -= 20;
@@ -424,7 +434,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
                 }
 
-                render3DObject(boardModelViewMatrix.clone(), projectionMatrix, fallingObject, ON_BOARD);
+                if(!fallingObject.isOnGround) render3DObject(boardModelViewMatrix.clone(), projectionMatrix, fallingObject, ON_BOARD);
                 Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
                 Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
 
@@ -449,8 +459,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
 
-            if (fallingObject.detectCollision(objectList.get(0))) {
+            if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
                 ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                fallingObject.isOnGround = true;
             }else {
                 if(fallingObject.fallCount==60) {
                     fallingObject.bottomCenterZ -= 20;
@@ -458,7 +469,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 }
                 else fallingObject.fallCount++;
             }
-            render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
+            if(!fallingObject.isOnGround) render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
             Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
             Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
 

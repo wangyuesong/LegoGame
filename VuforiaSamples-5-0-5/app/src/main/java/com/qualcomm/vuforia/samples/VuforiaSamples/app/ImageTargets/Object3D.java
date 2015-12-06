@@ -47,6 +47,7 @@ public class Object3D {
 
     public boolean isInBoardCoordinate = true;
     public boolean isFalling = false;
+    public boolean isOnGround = false;
     public boolean isMoved = false;
     public int  moveCount = 0;
     public int fallCount = 0;
