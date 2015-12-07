@@ -10,9 +10,9 @@ public class ShortStickObject extends Object3D {
     public ShortStickObject(int x, int y, int z, int t) {
         super(x, y, z, t);
 
-        bottomCenterX=x*20;
-        bottomCenterY=y*20;
-        bottomCenterZ=z*20;
+        bottomCenterX=x*Const.cubeSize;
+        bottomCenterY=y*Const.cubeSize;
+        bottomCenterZ=z*Const.cubeSize;
 
         List<int[]> longStickOffsetList =new ArrayList<int[]>();
         longStickOffsetList.add(new int[]{0, 0, 0});

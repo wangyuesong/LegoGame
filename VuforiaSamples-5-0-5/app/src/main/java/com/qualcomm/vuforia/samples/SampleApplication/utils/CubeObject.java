@@ -7,6 +7,8 @@ and other countries. Trademarks of QUALCOMM Incorporated are used with permissio
 
 package com.qualcomm.vuforia.samples.SampleApplication.utils;
 
+import com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets.Const;
+
 import java.nio.Buffer;
 
 
@@ -107,7 +109,7 @@ public class CubeObject extends MeshObject
 //        }
         for(int i = 0; i < cubeVertices.length ; i++)
         {
-            cubeVertices[i]*=10;
+            cubeVertices[i]*= Const.cubeSize/2;
        }
 
         cubeVertexLen = cubeVertices.length;

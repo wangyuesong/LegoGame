@@ -17,9 +17,9 @@ public class PileObject extends Object3D {
 //                other.centerZ + other.offsetList.get(i)[2]});
 //        }
         for (int i = 0; i < other.bottomOffsetList.size(); i++) {
-            this.offsetList.add(new int[]{(int) (other.bottomCenterX/20 + other.bottomOffsetList.get(i)[0]),
-                    (int) (other.bottomCenterY/20 + other.bottomOffsetList.get(i)[1]),
-                    (int) (other.bottomCenterZ/20 + other.bottomOffsetList.get(i)[2])});
+            this.offsetList.add(new int[]{(int) (other.bottomCenterX/Const.cubeSize + other.bottomOffsetList.get(i)[0]),
+                    (int) (other.bottomCenterY/Const.cubeSize + other.bottomOffsetList.get(i)[1]),
+                    (int) (other.bottomCenterZ/Const.cubeSize + other.bottomOffsetList.get(i)[2])});
         }
     }
     public void elimate(){
@@ -30,7 +30,7 @@ public class PileObject extends Object3D {
     }
 
         for (int i = 1;i <10 ;i++){
-            if (countlevel[i] == 13*9){
+            if (countlevel[i] == Const.bottomWidth*Const.bottomLength){
                 for (int j = 0; j < this.offsetList.size(); j++) {
                     if (offsetList.get(j)[2] == i) {
                         this.offsetList.remove(j);

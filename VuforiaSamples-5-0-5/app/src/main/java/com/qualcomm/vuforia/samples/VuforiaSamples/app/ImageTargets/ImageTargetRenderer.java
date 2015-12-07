@@ -75,6 +75,10 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     float currentZ = 0.0f;
 
+//    public static final int Const.bottomWidth = 5;
+//    public static final int Const.bottomLength = 3;
+//    public static final int Const.cubeSize = 50;
+
     public ImageTargetRenderer(ImageTargets activity,
                                SampleApplicationSession session)
     {
@@ -130,10 +134,10 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         pile= new HashMap<Integer,boolean[][]>();
         for(int i =0 ; i < 10; i ++)
         {
-            boolean[][] level = new boolean[13][9];
+            boolean[][] level = new boolean[Const.bottomWidth][Const.bottomLength];
             if(i == 0)
             {
-                level = new boolean[13][9];
+                level = new boolean[Const.bottomWidth][Const.bottomLength];
                 for(int k = 0; k < level.length; k ++)
                     for(int h =0; h < level[0].length; h++)
                     {
@@ -142,11 +146,11 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             }
             if(i == 1)
             {
-                level = new boolean[13][9];
+                level = new boolean[Const.bottomWidth][Const.bottomLength];
                 for(int k = 0; k < level.length; k ++)
                     for(int h =0; h < level[0].length; h++)
                     {
-                        if (k ==6 && h ==4 )level[k][h] = false;
+                        if (k ==Const.bottomWidth/2 && h ==Const.bottomLength/2 )level[k][h] = false;
                         else level[k][h] = true;
                     }
             }
@@ -156,8 +160,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         //add pileObject and 3 unique objects to the objectList
         objectList.add(pileObject);
         objectList.add(new ShortStickObject(0,0,6,1));
-        objectList.add(new LongStickObject(4,4,6,1));
-        objectList.add(new CurveObject(-4,4,6,1));
+        objectList.add(new LongStickObject(1,1,6,1));
+        objectList.add(new CurveObject(-1,1,6,1));
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f
                 : 1.0f);
@@ -216,7 +220,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 {
                     if(level[i][j])
                     {
-                        pileList.add(new int[]{i - 6, j - 4, key});
+                        pileList.add(new int[]{i - Const.bottomWidth/2, j - Const.bottomLength/2, key});
                     }
                 }
         }
@@ -275,19 +279,19 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             randomfalldown = (int) (Math.floor(Math.random() * 4) +0);
             switch (randomfalldown) {
                 case 0:
-                    objectList.add(new LongStickObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 0));
+                    objectList.add(new LongStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 0));
                     break;
                 case 1:
-                    objectList.add(new ShortStickObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 1));
+                    objectList.add(new ShortStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 1));
                     break;
                 case 2:
-                    objectList.add(new CurveObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 2));
+                    objectList.add(new CurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 2));
                     break;
                 case 3:
-                    objectList.add(new AutoObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 3));
+                    objectList.add(new AutoObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 3));
                     break;
                 case 4:
-                    objectList.add(new DoubleCurveObject((int) (Math.floor(Math.random() * 13) - 6), (int) (Math.floor(Math.random() * 9) - 4), 6, 4));
+                    objectList.add(new DoubleCurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 4));
                     break;
             }
         }
@@ -424,7 +428,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                         fallingObject.isOnGround = true;
                     }else {
                         if(fallingObject.fallCount==60) {
-                                fallingObject.bottomCenterZ -= 20;
+                                fallingObject.bottomCenterZ -= Const.cubeSize;
                                 fallingObject.fallCount = 0;
                         }
                         else fallingObject.fallCount++;
@@ -464,7 +468,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 fallingObject.isOnGround = true;
             }else {
                 if(fallingObject.fallCount==60) {
-                    fallingObject.bottomCenterZ -= 20;
+                    fallingObject.bottomCenterZ -= Const.cubeSize;
                     fallingObject.fallCount = 0;
                 }
                 else fallingObject.fallCount++;
@@ -549,8 +553,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             for (int[] offset :obj.offsetList){
                 float[] newModelViewMatrixCopy  = modelViewMatrixCopy.clone();
 
-                Matrix.translateM(newModelViewMatrixCopy, 0, (obj.centerX + offset[0]) * 20, (obj.centerY + offset[1]) * 20,
-                        (obj.centerZ + offset[2]) * 20);
+                Matrix.translateM(newModelViewMatrixCopy, 0, (obj.centerX + offset[0]) * Const.cubeSize, (obj.centerY + offset[1]) * Const.cubeSize,
+                        (obj.centerZ + offset[2]) * Const.cubeSize);
                 Matrix.scaleM(newModelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
                         OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
 
@@ -584,7 +588,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             for (float[] offset :boardOrBottomOffsetList){
 
                 float[] tempMatrix2 = new float[16];
-                Matrix.multiplyMM(tempMatrix2, 0, boardOrBottomSelfRotationMatrix, 0, getTranslationMatrix(offset[0]*20,offset[1]*20,offset[2]*20), 0);
+                Matrix.multiplyMM(tempMatrix2, 0, boardOrBottomSelfRotationMatrix, 0, getTranslationMatrix(offset[0]*Const.cubeSize,offset[1]*Const.cubeSize,offset[2]*Const.cubeSize), 0);
 
                 float[] tempMatrix3 = new float[16];
                 //if(offset.equals(boardOrBottomOffsetList.get(0))) tempMatrix2=boardOrBottomSelfRotationMatrix.clone();

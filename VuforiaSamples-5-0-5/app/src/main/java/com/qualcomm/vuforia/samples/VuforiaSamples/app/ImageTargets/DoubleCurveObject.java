@@ -10,9 +10,9 @@ public class DoubleCurveObject extends Object3D {
     public DoubleCurveObject(int x, int y, int z, int t) {
         super(x, y, z, t);
 
-        bottomCenterX=x*20.0f;
-        bottomCenterY=y*20.0f;
-        bottomCenterZ=z*20.0f;
+        bottomCenterX=x*Const.cubeSize;
+        bottomCenterY=y*Const.cubeSize;
+        bottomCenterZ=z*Const.cubeSize;
 
         List<int[]> doublecurveOffsetList =new ArrayList<int[]>();
         doublecurveOffsetList.add(new int[]{0, 0, 0});

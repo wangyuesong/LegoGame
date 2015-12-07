@@ -52,6 +52,11 @@ public class Object3D {
     public int  moveCount = 0;
     public int fallCount = 0;
 
+//    public static final int Const.bottomWidth = 5;
+//    public static final int Const.bottomLength = 3;
+//    public static final int Const.cubeSize = 50;
+
+
 
     private float[] getRotationMatrix(float[] modelViewMatrix)
     {
@@ -130,9 +135,9 @@ public class Object3D {
     {
         float[] outputCoordinate=new float[3];
 
-        outputCoordinate[0] = Math.round(inputCoordinate[0]/20)*20;
-        outputCoordinate[1] = Math.round(inputCoordinate[1]/20)*20;
-        outputCoordinate[2] = Math.round(inputCoordinate[2]/20)*20;
+        outputCoordinate[0] = Math.round(inputCoordinate[0]/Const.cubeSize)*Const.cubeSize;
+        outputCoordinate[1] = Math.round(inputCoordinate[1]/Const.cubeSize)*Const.cubeSize;
+        outputCoordinate[2] = Math.round(inputCoordinate[2]/Const.cubeSize)*Const.cubeSize;
 
         return outputCoordinate;
     }
@@ -203,7 +208,7 @@ public class Object3D {
 
     public void down(Object3D pile){
         if (!detectCollision(pile)&&centerZ!=0)
-        {centerZ --; bottomCenterZ-=20;}
+        {centerZ --; bottomCenterZ-=Const.cubeSize;}
 
     }
 
@@ -234,24 +239,25 @@ public class Object3D {
 
 
         HashMap<Integer,boolean[][]> pile = new HashMap<>();
+
         for(int i =0 ; i < 10; i++)
         {
-            boolean[][] level = new boolean[13][9];
+            boolean[][] level = new boolean[Const.bottomWidth][Const.bottomLength];
             pile.put((int)i,level);
         }
 
         for(int[] oneOffset: pileObject.offsetList)
         {
             boolean[][] origin = pile.get(oneOffset[2]);
-            origin[oneOffset[0]+6][oneOffset[1]+4]  = true;
+            origin[oneOffset[0]+Const.bottomWidth/2][oneOffset[1]+Const.bottomLength/2]  = true;
             pile.put(oneOffset[2],origin);
         }
 
         for(float[] oneOffset : bottomOffsetList)
         {
-            if(bottomCenterZ/20 -1+ oneOffset[2] < 0)
+            if(bottomCenterZ/Const.cubeSize -1+ oneOffset[2] < 0)
                 continue;
-            if(pile.get((int)(bottomCenterZ/20 -1+ oneOffset[2]))[(int)(bottomCenterX/20 + oneOffset[0] + 6)][(int)(bottomCenterY/20 + oneOffset[1] + 4)])
+            if(pile.get((int)(bottomCenterZ/Const.cubeSize -1+ oneOffset[2]))[(int)(bottomCenterX/Const.cubeSize + oneOffset[0] + Const.bottomWidth/2)][(int)(bottomCenterY/Const.cubeSize + oneOffset[1] + Const.bottomLength/2)])
                 return true;
         }
         return false;
