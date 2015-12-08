@@ -246,8 +246,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
 
     private void renderFrame()
     {
-        Object3D[] randomObjectList = new Object3D[]{new CurveObject(0,0,0,1),new AutoObject(0,0,0,1),new DoubleCurveObject(0,0,0,1),
-                new LongStickObject(0,0,0,1),new ShortStickObject(0,0,0,1)};
+        Object3D[] randomObjectList = new Object3D[]{new CurveObject(0,0,0,0),new AutoObject(0,0,0,2),new DoubleCurveObject(0,0,0,3),
+                new LongStickObject(0,0,0,4),new ShortStickObject(0,0,0,5)};
         if(fallingObject.isOnGround) fallingObject= randomObjectList[new Random().nextInt(randomObjectList.length)];
         addObject++;
         CameraCalibration camCal = CameraDevice.getInstance()
@@ -560,6 +560,14 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         }
         if(mode == ON_BOTTOM_GRID)
             for (int[] offset :obj.offsetList){
+                int color;
+                if (offset[2]%2 ==0 ){
+                if ((offset[0]+offset[1])%2 == 0) color =1;
+                else color = 2;}
+                else {
+                    if ((offset[0]+offset[1])%2 == 0) color =2;
+                    else color = 1;
+                }
                 float[] newModelViewMatrixCopy  = modelViewMatrixCopy.clone();
 
                 Matrix.translateM(newModelViewMatrixCopy, 0, (obj.centerX + offset[0]) * Const.cubeSize, (obj.centerY + offset[1]) * Const.cubeSize,
@@ -581,7 +589,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                 GLES20.glEnableVertexAttribArray(textureCoordHandle);
                 GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
                 GLES20.glBindTexture(GLES20.GL_TEXTURE_2D,
-                        mTextures.get(obj.textureId).mTextureID[0]);
+                        mTextures.get(color).mTextureID[0]);
                 GLES20.glUniform1i(texSampler2DHandle, 0);
                 GLES20.glUniformMatrix4fv(mvpMatrixHandle, 1, false,
                         modelViewProjectionMatrix, 0);

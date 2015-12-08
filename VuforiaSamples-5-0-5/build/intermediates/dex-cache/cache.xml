@@ -2,11 +2,11 @@
 <items version="2" >
 
     <item
-        jar="G:\Lego\tetris\VuforiaSamples-5-0-5\app\src\main\Vuforia.jar"
+        jar="/Users/elaine/Desktop/ucsb_cs/code/CS290I_project_final/final/LegoGame/VuforiaSamples-5-0-5/app/src/main/Vuforia.jar"
         jumboMode="false"
         revision="23.0.2"
         sha1="41d57a73e39cc4f881f7409fb36d82373706a3b1">
-        <dex dex="G:\Lego\tetris\VuforiaSamples-5-0-5\app\build\intermediates\pre-dexed\debug\Vuforia-107c2b3b1a72610490f9387ba9660b5cf92ab60f.jar" />
+        <dex dex="/Users/elaine/Desktop/ucsb_cs/code/CS290I_project_final/final/LegoGame/VuforiaSamples-5-0-5/app/build/intermediates/pre-dexed/debug/Vuforia-50538f0d7d05a8de6ff276610ce34f4ed444e6ac.jar" />
     </item>
 
 </items>
