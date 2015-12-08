@@ -3,26 +3,52 @@
     android:id="@+id/camera_overlay_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+    <ProgressBar
+        style="@android:style/Widget.ProgressBar"
+        android:id="@+id/loading_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="2"
-        android:id="@+id/button2"
-        android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@+id/button"
-        android:layout_toEndOf="@+id/button" />
+        android:text="up"
+        android:id="@+id/up"
+        android:layout_above="@+id/left"
+        android:layout_toRightOf="@+id/left"
+        android:layout_toEndOf="@+id/left" />
 
     <Button
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="1"
-        android:id="@+id/button"
+        android:text="down"
+        android:id="@+id/down"
         android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/left"
+        android:layout_toLeftOf="@+id/right"
+        android:layout_toStartOf="@+id/right" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="left"
+        android:id="@+id/left"
+        android:layout_above="@+id/down"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginBottom="69dp" />
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="right"
+        android:id="@+id/right"
+        android:layout_above="@+id/down"
+        android:layout_toRightOf="@+id/up" />
 
 </RelativeLayout>
