@@ -21,6 +21,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.view.View;
 
 import com.qualcomm.vuforia.CameraCalibration;
 import com.qualcomm.vuforia.CameraDevice;
@@ -40,9 +41,10 @@ import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleApplication3DM
 import com.qualcomm.vuforia.samples.SampleApplication.utils.SampleUtils;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.Teapot;
 import com.qualcomm.vuforia.samples.SampleApplication.utils.Texture;
+import com.qualcomm.vuforia.samples.VuforiaSamples.R;
 
 // The renderer class for the ImageTargets sample.
-public class ImageTargetRenderer implements GLSurfaceView.Renderer
+public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClickListener
 {
     private static final String LOGTAG = "ImageTargetRenderer";
 
@@ -208,6 +210,25 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         // Hide the Loading Dialog
         mActivity.loadingDialogHandler
                 .sendEmptyMessage(LoadingDialogHandler.HIDE_LOADING_DIALOG);
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.up:
+                fallingObject.moveUp();
+                break;
+            case R.id.down:
+                fallingObject.moveDown();
+                break;
+            case R.id.left:
+                fallingObject.moveLeft();
+                break;
+            case R.id.right:
+                fallingObject.moveRight();
+                break;
+        }
 
     }
 
