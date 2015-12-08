@@ -75,6 +75,8 @@ public class Object3D {
 
         return temp;
     }
+
+
     //Question
     public void updateBoardXYZ(float[] boardToBottomModelViewMatrix)
     {
@@ -84,16 +86,8 @@ public class Object3D {
         boardCenterX = temp[0];
         boardCenterY = temp[1];
         boardCenterZ = temp[2];
-        //Offset only rotate
-//        for(int i = 0; i < bottomOffsetList.size(); i ++)
-//            boardOffsetList.set(i,convert(getRotationMatrix(bottomToBoardModelViewMatrix), bottomOffsetList.get(i)));
-
     }
 
-//    public void updateBoardOffset(float[] rotationMatrix){
-//        for(int i = 0; i < boardOffsetList.size(); i ++)
-//            boardOffsetList.set(i,convert(rotationMatrix, bottomOffsetList.get(i)));
-//    }
 
 
     private float[] convert(float[] modelViewMatrix, float[] oldXYZ) {
@@ -104,6 +98,47 @@ public class Object3D {
         float newZ =  oldXYZ[0]   * modelViewMatrix[2] +  oldXYZ[1]  * modelViewMatrix[6]
                 +  oldXYZ[2]   * modelViewMatrix[10] + modelViewMatrix[14];
         return new float[]{newX,newY,newZ};
+    }
+
+
+    public void moveLeft()
+    {
+        Log.i("MoveLeft","move left");
+//        this.bottomCenterX?
+        float widthRadius = (Const.bottomWidth -2)/2* Const.cubeSize;
+//        float lengthRadius = (Const.bottomLength -2)/2 * Const.cubeSize;
+
+        this.bottomCenterX = this.bottomCenterX - Const.cubeSize < -widthRadius ? this.bottomCenterX : this.bottomCenterX - Const.cubeSize;
+
+//        updateBoardXYZ(boardToBottomModelViewMatrix);
+    }
+
+    public void moveRight(){
+        Log.i("MoveRight","move right");
+//        this.bottomCenterX?
+        float widthRadius = (Const.bottomWidth -2)/2* Const.cubeSize;
+//        float lengthRadius = (Const.bottomLength -2)/2 * Const.cubeSize;
+
+        this.bottomCenterX = this.bottomCenterX + Const.cubeSize  > widthRadius ? this.bottomCenterX : this.bottomCenterX + Const.cubeSize;
+
+//        updateBoardXYZ(boardToBottomModelViewMatrix);
+    }
+    public void moveUp(){
+        Log.i("MoveUp","move up");
+        float lengthRadius = (Const.bottomLength -2)/2 * Const.cubeSize;
+
+        this.bottomCenterY = this.bottomCenterY - Const.cubeSize < -lengthRadius ? this.bottomCenterY : this.bottomCenterY - Const.cubeSize;
+
+//        updateBoardXYZ(boardToBottomModelViewMatrix);
+    }
+
+    public void moveDown(){
+        Log.i("Move down","move down");
+        float lengthRadius = (Const.bottomLength -2)/2 * Const.cubeSize;
+
+        this.bottomCenterY = this.bottomCenterY + Const.cubeSize > lengthRadius ? this.bottomCenterY : this.bottomCenterY + Const.cubeSize;
+
+//        updateBoardXYZ(boardToBottomModelViewMatrix);
     }
 
 
@@ -120,11 +155,6 @@ public class Object3D {
         bottomCenterZ = result[2];
 
         updateBottomOffsetList();
-
-        //Offset only rotate
-//        for(int i = 0; i < boardOffsetList.size(); i ++)
-//            bottomOffsetList.set(i, convert(getRotationMatrix(boardToBottomModelViewMatrix), boardOffsetList.get(i)));
-
     }
 
     public void updateBottomOffsetList()
@@ -218,32 +248,7 @@ public class Object3D {
 
 
     public boolean detectCollision(Object3D pileObject){
-
-//        HashMap<Integer,boolean[][]> pile = new HashMap<>();
-//        for(int i =0 ; i < 10; i ++)
-//        {
-//            boolean[][] level = new boolean[13][9];
-//            pile.put(i,level);
-//        }
-//        for(int[] oneOffset: pileObject.offsetList)
-//        {
-//            boolean[][] origin = pile.get(oneOffset[2]);
-//            origin[oneOffset[0]+6][oneOffset[1]+4]  = true;
-//            pile.put(oneOffset[2],origin);
-//        }
-
-
-//
-//        for(int[] oneOffset : offsetList)
-//        {
-//            if(centerZ -1+ oneOffset[2] < 0)
-//                continue;
-//            if(pile.get(centerZ -1+ oneOffset[2])[centerX + oneOffset[0] + 6][centerY + oneOffset[1] + 4])
-//                return true;
-//        }
-//        return false;
         HashMap<Integer,boolean[][]> pile = new HashMap<>();
-
         for(int i =0 ; i < 10; i++)
         {
             boolean[][] level = new boolean[Const.bottomWidth][Const.bottomLength];

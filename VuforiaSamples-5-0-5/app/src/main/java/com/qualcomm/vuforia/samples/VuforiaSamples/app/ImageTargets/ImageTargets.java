@@ -23,6 +23,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -65,7 +66,9 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     private int mStartDatasetsIndex = 0;
     private int mDatasetsNumber = 0;
     private ArrayList<String> mDatasetStrings = new ArrayList<String>();
-    
+
+
+
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
     
@@ -118,10 +121,9 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         // Load any sample specific textures:
         mTextures = new Vector<Texture>();
         loadTextures();
-        
         mIsDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith(
             "droid");
-        
+
     }
     
     // Process Single Tap event to trigger autofocus
@@ -310,7 +312,12 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         mRenderer = new ImageTargetRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
         mGlView.setRenderer(mRenderer);
-        
+
+        ((Button)findViewById(R.id.down)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.up)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.left)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.right)).setOnClickListener(mRenderer);
+
     }
     
     
