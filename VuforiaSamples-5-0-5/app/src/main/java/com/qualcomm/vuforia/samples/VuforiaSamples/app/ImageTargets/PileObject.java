@@ -1,5 +1,7 @@
 package com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -9,17 +11,18 @@ import java.util.List;
  */
 public class PileObject extends Object3D {
 
-    public void mergeAnObject(Object3D other) {
+    public void mergeAnObject(Object3D objectToBeMerged) {
 //        for (int i =0; i<other.offsetList.size();i++)
 //        {
 //         this.offsetList.add(new int[]{other.centerX+other.offsetList.get(i)[0],
 //                other.centerY + other.offsetList.get(i)[1],
 //                other.centerZ + other.offsetList.get(i)[2]});
 //        }
-        for (int i = 0; i < other.bottomOffsetList.size(); i++) {
-            this.offsetList.add(new int[]{(int) (other.bottomCenterX/Const.cubeSize + other.bottomOffsetList.get(i)[0]),
-                    (int) (other.bottomCenterY/Const.cubeSize + other.bottomOffsetList.get(i)[1]),
-                    (int) (other.bottomCenterZ/Const.cubeSize + other.bottomOffsetList.get(i)[2])});
+        Log.i("OtherObject:", objectToBeMerged.bottomCenterX + "," + objectToBeMerged.bottomCenterY + "," + objectToBeMerged.bottomCenterZ );
+        for (int i = 0; i < objectToBeMerged.bottomOffsetList.size(); i++) {
+            this.offsetList.add(new int[]{(int) (objectToBeMerged.bottomCenterX/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[0]),
+                    (int) (objectToBeMerged.bottomCenterY/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[1]),
+                    (int) (objectToBeMerged.bottomCenterZ/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[2])});
         }
     }
     public void elimate(){

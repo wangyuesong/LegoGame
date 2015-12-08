@@ -110,8 +110,10 @@ public class Object3D {
     public void updateBottomXYZ(float[] boardToBottomModelViewMatrix)
     {
         float[] temp = convert(boardToBottomModelViewMatrix, new float[]{boardCenterX, boardCenterY, boardCenterZ});
+        //拉回来
         float[] temp2 = getWithinBorderCoordinate(temp);
         //float[] result=temp.clone();
+        //转换到格点
         float[] result = getInGridCoordinate(temp2);
         bottomCenterX = result[0];
         bottomCenterY = result[1];
@@ -144,16 +146,18 @@ public class Object3D {
 
     private float[] getWithinBorderCoordinate(float[] inputCoordinate)
     {
+        float const1 = (Const.bottomWidth -2)/2* Const.cubeSize;
+        float const2 = (Const.bottomLength -2)/2 * Const.cubeSize;
         float[] outputCoordinate=new float[3];
-        if(inputCoordinate[0]<-100) outputCoordinate[0]=-100;
-        else if(inputCoordinate[0]>100) outputCoordinate[0]=100;
+        if(inputCoordinate[0]<-const1) outputCoordinate[0]=-const1;
+        else if(inputCoordinate[0]>const1) outputCoordinate[0]=const1;
         else outputCoordinate[0]=inputCoordinate[0];
 
-        if(inputCoordinate[1]<-60) outputCoordinate[1]=-60;
-        else if(inputCoordinate[1]>60) outputCoordinate[1]=60;
+        if(inputCoordinate[1]<-const2) outputCoordinate[1]=-const2;
+        else if(inputCoordinate[1]>const2) outputCoordinate[1]=const2;
         else outputCoordinate[1]=inputCoordinate[1];
 
-        if(inputCoordinate[2]>180 || inputCoordinate[2]<0) outputCoordinate[2]=180;
+        if(inputCoordinate[2]>9*Const.cubeSize || inputCoordinate[2]<0) outputCoordinate[2]=9*Const.cubeSize;
         else outputCoordinate[2]=inputCoordinate[2];
 
         return outputCoordinate;
@@ -227,6 +231,8 @@ public class Object3D {
 //            origin[oneOffset[0]+6][oneOffset[1]+4]  = true;
 //            pile.put(oneOffset[2],origin);
 //        }
+
+
 //
 //        for(int[] oneOffset : offsetList)
 //        {
@@ -236,8 +242,6 @@ public class Object3D {
 //                return true;
 //        }
 //        return false;
-
-
         HashMap<Integer,boolean[][]> pile = new HashMap<>();
 
         for(int i =0 ; i < 10; i++)
@@ -245,6 +249,8 @@ public class Object3D {
             boolean[][] level = new boolean[Const.bottomWidth][Const.bottomLength];
             pile.put((int)i,level);
         }
+
+        Log.i("Test","Object: x="  + bottomCenterX +", y=" + bottomCenterY + ", z=" + bottomCenterZ);
 
         for(int[] oneOffset: pileObject.offsetList)
         {
@@ -257,7 +263,13 @@ public class Object3D {
         {
             if(bottomCenterZ/Const.cubeSize -1+ oneOffset[2] < 0)
                 continue;
-            if(pile.get((int)(bottomCenterZ/Const.cubeSize -1+ oneOffset[2]))[(int)(bottomCenterX/Const.cubeSize + oneOffset[0] + Const.bottomWidth/2)][(int)(bottomCenterY/Const.cubeSize + oneOffset[1] + Const.bottomLength/2)])
+            Log.i("Test","x="  + bottomCenterX +", y=" + bottomCenterY + ", z=" + bottomCenterZ);
+            int level = (int)(bottomCenterZ/Const.cubeSize -1+ oneOffset[2]);
+            int x =(int)(bottomCenterX/Const.cubeSize + oneOffset[0]
+                    + Const.bottomWidth/2);
+            int y = (int)(bottomCenterY/Const.cubeSize + oneOffset[1] + Const.bottomLength/2);
+            Log.i("Levelxy","Level x y:"+ level + ","  + x + "," + y);
+            if(pile.get(level)[x][y])
                 return true;
         }
         return false;

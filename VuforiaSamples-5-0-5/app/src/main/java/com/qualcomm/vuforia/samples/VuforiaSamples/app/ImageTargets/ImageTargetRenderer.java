@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 import java.util.Vector;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -159,9 +160,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         Object3D pileObject = pileToPileObject(pile);
         //add pileObject and 3 unique objects to the objectList
         objectList.add(pileObject);
-        objectList.add(new ShortStickObject(0,0,6,1));
-        objectList.add(new LongStickObject(1,1,6,1));
-        objectList.add(new CurveObject(-1,1,6,1));
+//        objectList.add(new ShortStickObject(0,0,6,1));
+//        objectList.add(new LongStickObject(1,1,6,1));
+//        objectList.add(new CurveObject(-1,1,6,1));
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f
                 : 1.0f);
@@ -240,10 +241,14 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
     int random =0;
     int randomfalldown =0;
 
+
     Object3D fallingObject = new CurveObject(0,0,0,1);
 
     private void renderFrame()
     {
+        Object3D[] randomObjectList = new Object3D[]{new CurveObject(0,0,0,1),new AutoObject(0,0,0,1),new DoubleCurveObject(0,0,0,1),
+                new LongStickObject(0,0,0,1),new ShortStickObject(0,0,0,1)};
+        if(fallingObject.isOnGround) fallingObject= randomObjectList[new Random().nextInt(randomObjectList.length)];
         addObject++;
         CameraCalibration camCal = CameraDevice.getInstance()
                 .getCameraCalibration();
@@ -259,42 +264,42 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         float height=size.getData()[1];
         int[] countlevel = new int[10];
 
-        count ++;
-        if (count == 10) {
-            count = 0;
-            for (int i = 1; i < objectList.size(); i++) {
-                if (objectList.get(i).detectCollision(objectList.get(0))) {
-                    ((PileObject) objectList.get(0)).mergeAnObject(objectList.get(i));
-                    objectList.remove(i);
-                    i --;
-                }else {
-                    objectList.get(i).down(objectList.get(0));
-                }
-            }
-        }
+//        count ++;
+//        if (count == 10) {
+//            count = 0;
+//            for (int i = 1; i < objectList.size(); i++) {
+//                if (objectList.get(i).detectCollision(objectList.get(0))) {
+//                    ((PileObject) objectList.get(0)).mergeAnObject(objectList.get(i));
+//                    objectList.remove(i);
+//                    i --;
+//                }else {
+//                    objectList.get(i).down(objectList.get(0));
+//                }
+//            }
+//        }
 
         ((PileObject) objectList.get(0)).elimate();
-        if(addObject == 100) {
-            addObject = 0;
-            randomfalldown = (int) (Math.floor(Math.random() * 4) +0);
-            switch (randomfalldown) {
-                case 0:
-                    objectList.add(new LongStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 0));
-                    break;
-                case 1:
-                    objectList.add(new ShortStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 1));
-                    break;
-                case 2:
-                    objectList.add(new CurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 2));
-                    break;
-                case 3:
-                    objectList.add(new AutoObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 3));
-                    break;
-                case 4:
-                    objectList.add(new DoubleCurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 4));
-                    break;
-            }
-        }
+//        if(addObject == 100) {
+//            addObject = 0;
+//            randomfalldown = (int) (Math.floor(Math.random() * 4) +0);
+//            switch (randomfalldown) {
+//                case 0:
+//                    objectList.add(new LongStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 0));
+//                    break;
+//                case 1:
+//                    objectList.add(new ShortStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 1));
+//                    break;
+//                case 2:
+//                    objectList.add(new CurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 2));
+//                    break;
+//                case 3:
+//                    objectList.add(new AutoObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 3));
+//                    break;
+//                case 4:
+//                    objectList.add(new DoubleCurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 4));
+//                    break;
+//            }
+//        }
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         State state = mRenderer.begin();
         mRenderer.drawVideoBackground();
@@ -314,12 +319,12 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
         float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
         if(modelViewMap.containsKey("stones"))
-        {
-            for(Object3D obj: objectList)
-            {
-                render3DObject(modelViewMap.get("stones").getData(),projectionMatrix,obj,ON_BOTTOM_GRID);
-            }
-        }
+//        {
+//            for(Object3D obj: objectList)
+//            {
+                render3DObject(modelViewMap.get("stones").getData(),projectionMatrix,objectList.get(0),ON_BOTTOM_GRID);
+//             }
+//        }
 
 
 
@@ -380,40 +385,43 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                         (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) * (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) +
                         (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ) * (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ));
 
-                if (distance < 250 && fallingObject.isMoved == false) {
+                Log.i("Distance", distance + ",FalliingObject:" + (fallingObject.bottomCenterX - boardCenterInBottomCoordinateX) +
+                        "," + (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) +
+                "," + (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ) );
+
+                if (distance < 400 && fallingObject.isMoved == false) {
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
                     fallingObject.moveCount = 0;
                     fallingObject.isMoved = true;
                 }
 
                 //When the object is being pushed
-                if (distance < 250 && fallingObject.isMoved && fallingObject.moveCount < 50) {
+                if (distance < 400 && fallingObject.isMoved && fallingObject.moveCount < 50) {
                     fallingObject.moveCount++;
-                    float currentX = fallingObject.bottomCenterZ;
-                    float currentY = fallingObject.bottomCenterZ;
+                    float currentX = fallingObject.bottomCenterX;
+                    float currentY = fallingObject.bottomCenterY;
                     float currentZ = fallingObject.bottomCenterZ;
 
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
 //                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
+                    if(fallingObject.fallCount==25) {
+                        if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
+                            fallingObject.bottomCenterX = currentX;
+                            fallingObject.bottomCenterY = currentY;
+                            fallingObject.bottomCenterZ = currentZ;
 
-                    if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
-                        fallingObject.bottomCenterX=currentX;
-                        fallingObject.bottomCenterY=currentY;
+                            fallingObject.isOnGround = true;
+
+                            ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                        } else {
+                            fallingObject.bottomCenterZ = currentZ - Const.cubeSize;
+                            fallingObject.fallCount = 0;
+                        }
+                    }
+                    else
+                    {
+                        fallingObject.fallCount++;
                         fallingObject.bottomCenterZ=currentZ;
-
-                        fallingObject.isOnGround=true;
-
-                        ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
-                    }else {
-                        if(fallingObject.fallCount==60) {
-                                fallingObject.bottomCenterZ = currentZ - 20;
-                                fallingObject.fallCount = 0;
-                        }
-                        else
-                        {
-                            fallingObject.bottomCenterZ=currentZ;
-                            fallingObject.fallCount++;
-                        }
                     }
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
@@ -423,16 +431,16 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
                     fallingObject.isMoved = false;
                     fallingObject.moveCount = 50;
 
-                    if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
-                        ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
-                        fallingObject.isOnGround = true;
-                    }else {
-                        if(fallingObject.fallCount==60) {
-                                fallingObject.bottomCenterZ -= Const.cubeSize;
-                                fallingObject.fallCount = 0;
+                    if(fallingObject.fallCount==25) {
+                        if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
+                            ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                            fallingObject.isOnGround = true;
+                        } else {
+                            fallingObject.bottomCenterZ -= Const.cubeSize;
+                            fallingObject.fallCount = 0;
                         }
-                        else fallingObject.fallCount++;
                     }
+                    else fallingObject.fallCount++;
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
@@ -463,16 +471,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer
             float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
 
-            if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
-                ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
-                fallingObject.isOnGround = true;
-            }else {
-                if(fallingObject.fallCount==60) {
+            if(fallingObject.fallCount==25) {
+                if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
+                    ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                    fallingObject.isOnGround = true;
+                } else {
                     fallingObject.bottomCenterZ -= Const.cubeSize;
                     fallingObject.fallCount = 0;
                 }
-                else fallingObject.fallCount++;
             }
+            else fallingObject.fallCount++;
+
             if(!fallingObject.isOnGround) render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
             Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
             Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
