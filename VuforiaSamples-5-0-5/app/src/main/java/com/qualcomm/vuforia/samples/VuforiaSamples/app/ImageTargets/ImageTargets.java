@@ -308,7 +308,7 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         mGlView = new SampleApplicationGLView(this);
         mGlView.init(translucent, depthSize, stencilSize);
 
-        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS,6);
+        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 6);
         mRenderer = new ImageTargetRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
         mGlView.setRenderer(mRenderer);
@@ -317,6 +317,7 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         ((Button)findViewById(R.id.up)).setOnClickListener(mRenderer);
         ((Button)findViewById(R.id.left)).setOnClickListener(mRenderer);
         ((Button)findViewById(R.id.right)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.drop)).setOnClickListener(mRenderer);
 
     }
     

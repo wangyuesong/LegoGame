@@ -20,20 +20,26 @@ public class PileObject extends Object3D {
 //        }
         Log.i("OtherObject:", objectToBeMerged.bottomCenterX + "," + objectToBeMerged.bottomCenterY + "," + objectToBeMerged.bottomCenterZ );
         for (int i = 0; i < objectToBeMerged.bottomOffsetList.size(); i++) {
-            this.offsetList.add(new int[]{(int) (objectToBeMerged.bottomCenterX/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[0]),
-                    (int) (objectToBeMerged.bottomCenterY/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[1]),
-                    (int) (objectToBeMerged.bottomCenterZ/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[2])});
+            int offSetX = (int) (objectToBeMerged.bottomCenterX/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[0]);
+            int offSetY = (int) (objectToBeMerged.bottomCenterY/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[1]);
+            int offSetZ = (int) (objectToBeMerged.bottomCenterZ/Const.cubeSize + objectToBeMerged.bottomOffsetList.get(i)[2]);
+            this.offsetList.add(new int[]{offSetX,offSetY,offSetZ});
+            this.pileIsOrNotOccupied.get(offSetZ)[offSetX+Const.bottomWidth/2][offSetY+Const.bottomLength/2]=true;
         }
     }
     public void elimate(){
-        int []countlevel = new int[10];
+        int []countlevel = new int[Const.bottomHeight];
     for(int[] oneOffset: this.offsetList)
     {
         countlevel[oneOffset[2]]++;
     }
 
-        for (int i = 1;i <10 ;i++){
+        for (int i = 1;i <Const.bottomHeight ;i++){
             if (countlevel[i] == Const.bottomWidth*Const.bottomLength){
+
+                boolean[][] tempLayer=new boolean[Const.bottomWidth][Const.bottomLength];
+                this.pileIsOrNotOccupied.put(i,tempLayer);
+
                 for (int j = 0; j < this.offsetList.size(); j++) {
                     if (offsetList.get(j)[2] == i) {
                         this.offsetList.remove(j);
@@ -51,6 +57,5 @@ public class PileObject extends Object3D {
 
     public PileObject(int x, int y, int z, int t, List<int[]> offsetList) {
         super(x, y, z, t,offsetList);
-
     }
 }

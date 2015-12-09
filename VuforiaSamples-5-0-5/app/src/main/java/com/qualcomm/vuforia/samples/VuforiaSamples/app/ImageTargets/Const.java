@@ -5,8 +5,12 @@ package com.qualcomm.vuforia.samples.VuforiaSamples.app.ImageTargets;
  */
 public class Const {
     public static final int bottomLength = 5;
-    public static final int bottomWidth = 9;
-    public static final int cubeSize = 30;
+    public static final int bottomWidth = 5;
+    public static final int bottomHeight = 15;
+    public static final int cubeSize = 20;
+    public static final int fallingAngle = 50;
+    public static final int fallingInterval = 45;
+
 }
 
 //150, 250

@@ -17,11 +17,13 @@ import java.util.Vector;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import android.graphics.Color;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import com.qualcomm.vuforia.CameraCalibration;
 import com.qualcomm.vuforia.CameraDevice;
@@ -76,9 +78,9 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
 
     private static final float CUBE_SIDE = 50.0f;
 
-    float currentZ = 0.0f;
+    private float autoRotateAngle=0.0f;
 
-//    public static final int Const.bottomWidth = 5;
+    //    public static final int Const.bottomWidth = 5;
 //    public static final int Const.bottomLength = 3;
 //    public static final int Const.cubeSize = 50;
 
@@ -134,8 +136,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
     {
         mRenderer = Renderer.getInstance();
 
-        pile= new HashMap<Integer,boolean[][]>();
-        for(int i =0 ; i < 10; i ++)
+        HashMap<Integer,boolean[][]> pile= new HashMap<Integer,boolean[][]>();
+        for(int i =0 ; i < Const.bottomHeight; i ++)
         {
             boolean[][] level = new boolean[Const.bottomWidth][Const.bottomLength];
             if(i == 0)
@@ -153,18 +155,15 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
                 for(int k = 0; k < level.length; k ++)
                     for(int h =0; h < level[0].length; h++)
                     {
-                        if (k ==Const.bottomWidth/2 && h ==Const.bottomLength/2 )level[k][h] = false;
+                        if (k ==Const.bottomWidth/2
+                                //&& h ==Const.bottomLength/2
+                                )level[k][h] = false;
                         else level[k][h] = true;
                     }
             }
             pile.put(i,level);
         }
-        Object3D pileObject = pileToPileObject(pile);
-        //add pileObject and 3 unique objects to the objectList
-        objectList.add(pileObject);
-//        objectList.add(new ShortStickObject(0,0,6,1));
-//        objectList.add(new LongStickObject(1,1,6,1));
-//        objectList.add(new CurveObject(-1,1,6,1));
+        pileObject = pileToPileObject(pile);
 
         GLES20.glClearColor(0.0f, 0.0f, 0.0f, Vuforia.requiresAlpha() ? 0.0f
                 : 1.0f);
@@ -213,27 +212,10 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
 
     }
 
-    @Override
-    public void onClick(View v) {
-        switch(v.getId()) {
-            case R.id.up:
-                fallingObject.moveUp();
-                break;
-            case R.id.down:
-                fallingObject.moveDown();
-                break;
-            case R.id.left:
-                fallingObject.moveLeft();
-                break;
-            case R.id.right:
-                fallingObject.moveRight();
-                break;
-        }
-
-    }
-
     private Object3D pileToPileObject(HashMap<Integer,boolean[][]> pile)
     {
+        List<int[]>pileList =new ArrayList<int[]>();
+
         for(Integer key: pile.keySet())
         {
             boolean[][] level = pile.get(key);
@@ -247,84 +229,74 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
                 }
         }
 
-        Object3D pileObject = new PileObject(0,0,0,5,pileList);
-        return pileObject;
+        Object3D tempObject;
+        tempObject=new PileObject(0,0,0,5,pileList);
+
+        tempObject.pileIsOrNotOccupied=pile;
+        return tempObject;
     }
 
-    int count =0;
-    int up;
-    private HashMap<Integer,boolean[][]> pile;
+    @Override
+    public void onClick(View v) {
+        if(fallingObject.isFalling) {
+            switch (v.getId()) {
+                case R.id.drop:
+                    fallingObject.drop(pileObject);
+                case R.id.up:
+                    fallingObject.moveFront(pileObject);
+                    break;
+                case R.id.down:
+                    fallingObject.moveBack(pileObject);
+                    break;
+                case R.id.left:
+                    fallingObject.moveLeft(pileObject);
+                    break;
+                case R.id.right:
+                    fallingObject.moveRight(pileObject);
+                    break;
+            }
+        }
 
-    List<int[]>pileList =new ArrayList<int[]>();
-    List<Object3D> objectList = new ArrayList<Object3D>();
+    }
 
-    int addObject =0;
-    int random =0;
-    int randomfalldown =0;
-
-
+    Object3D pileObject;
     Object3D fallingObject = new CurveObject(0,0,0,1);
 
-    private void renderFrame()
-    {
-        Object3D[] randomObjectList = new Object3D[]{new CurveObject(0,0,0,0),new AutoObject(0,0,0,2),new DoubleCurveObject(0,0,0,3),
-                new LongStickObject(0,0,0,4),new ShortStickObject(0,0,0,5)};
-        if(fallingObject.isOnGround) fallingObject= randomObjectList[new Random().nextInt(randomObjectList.length)];
-        addObject++;
-        CameraCalibration camCal = CameraDevice.getInstance()
-                .getCameraCalibration();
-        //Get intrinsic parameters
-        Vec2F f = camCal.getFocalLength();
-        Vec2F center = camCal.getPrincipalPoint();
-        Vec2F size = camCal.getSize();
-        float fx=f.getData()[0];
-        float fy=f.getData()[1];
-        float cx=center.getData()[0];
-        float cy=center.getData()[1];
-        float width=size.getData()[0];
-        float height=size.getData()[1];
-        int[] countlevel = new int[10];
+    private void renderFrame() {
+        if(!fallingObject.ableToFall && !fallingObject.isFalling){
+            final TextView tv = (TextView) mActivity.findViewById(R.id.indicator);
+            tv.post(new Runnable() {//另外一种更简洁的发送消息给ui线程的方法。
+                @Override
+                public void run() {//run()方法会在ui线程执行
+                    tv.setTextColor(Color.YELLOW);
+                    tv.setText("Please move closer");
+                }
+            });
+        }
+        else{
+            final TextView tv = (TextView) mActivity.findViewById(R.id.indicator);
+            tv.post(new Runnable() {//另外一种更简洁的发送消息给ui线程的方法。
+                @Override
+                public void run() {//run()方法会在ui线程执行
+                    tv.setText("");
+                }
+            });
+        }
+        autoRotateAngle = (autoRotateAngle + 1) % 360;
 
-//        count ++;
-//        if (count == 10) {
-//            count = 0;
-//            for (int i = 1; i < objectList.size(); i++) {
-//                if (objectList.get(i).detectCollision(objectList.get(0))) {
-//                    ((PileObject) objectList.get(0)).mergeAnObject(objectList.get(i));
-//                    objectList.remove(i);
-//                    i --;
-//                }else {
-//                    objectList.get(i).down(objectList.get(0));
-//                }
-//            }
-//        }
+        Object3D[] randomObjectList = new Object3D[]{new CurveObject(0, 0, 0, 0), new AutoObject(0, 0, 0, 2),
+                //new DoubleCurveObject(0, 0, 0, 3),
+                new LongStickObject(0, 0, 0, 4), new ShortStickObject(0, 0, 0, 5)};
+        if (fallingObject.isOnGround) {
+            fallingObject = randomObjectList[new Random().nextInt(randomObjectList.length)];
+        }
+        ((PileObject) pileObject).elimate();
 
-        ((PileObject) objectList.get(0)).elimate();
-//        if(addObject == 100) {
-//            addObject = 0;
-//            randomfalldown = (int) (Math.floor(Math.random() * 4) +0);
-//            switch (randomfalldown) {
-//                case 0:
-//                    objectList.add(new LongStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 0));
-//                    break;
-//                case 1:
-//                    objectList.add(new ShortStickObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 1));
-//                    break;
-//                case 2:
-//                    objectList.add(new CurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 2));
-//                    break;
-//                case 3:
-//                    objectList.add(new AutoObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 3));
-//                    break;
-//                case 4:
-//                    objectList.add(new DoubleCurveObject((int) (Math.floor(Math.random() * Const.bottomWidth) - Const.bottomWidth/2), (int) (Math.floor(Math.random() * Const.bottomLength) - Const.bottomLength/2), 6, 4));
-//                    break;
-//            }
-//        }
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         State state = mRenderer.begin();
         mRenderer.drawVideoBackground();
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+
         // handle face culling, we need to detect if we are using reflection
         // to determine the direction of the culling
         GLES20.glEnable(GLES20.GL_CULL_FACE);
@@ -334,184 +306,118 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
         else
             GLES20.glFrontFace(GLES20.GL_CCW); // Back camera
 
-        HashMap<String,Matrix44F> modelViewMap = new HashMap<String,Matrix44F>();
+        HashMap<String, Matrix44F> modelViewMap = new HashMap<String, Matrix44F>();
         getAllModelViewMap(state, modelViewMap);
 
         float[] projectionMatrix = vuforiaAppSession.getProjectionMatrix().getData();
 
-        if(modelViewMap.containsKey("stones"))
-//        {
-//            for(Object3D obj: objectList)
-//            {
-                render3DObject(modelViewMap.get("stones").getData(),projectionMatrix,objectList.get(0),ON_BOTTOM_GRID);
-//             }
-//        }
-
-
-
-        if(modelViewMap.containsKey("chips") && modelViewMap.containsKey("stones")) {
+        if (modelViewMap.containsKey("stones")) {
             float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
-            float[] boardModelViewMatrix = modelViewMap.get("chips").getData();
             float[] invertedBottomModelViewMatrix = new float[16];
             Matrix.invertM(invertedBottomModelViewMatrix, 0, bottomModelViewMatrix, 0);
 
-            float[] boardToBottomModelViewMatrix = new float[16];
-            Matrix.multiplyMM(boardToBottomModelViewMatrix, 0, invertedBottomModelViewMatrix, 0, boardModelViewMatrix, 0);
+            if (modelViewMap.containsKey("chips")) {
+                float[] boardModelViewMatrix = modelViewMap.get("chips").getData();
+                float[] boardToBottomModelViewMatrix = new float[16];
+                Matrix.multiplyMM(boardToBottomModelViewMatrix, 0, invertedBottomModelViewMatrix, 0, boardModelViewMatrix, 0);
+                float[] bottomToBoardModelViewMatrix = new float[16];
+                Matrix.invertM(bottomToBoardModelViewMatrix, 0, boardToBottomModelViewMatrix, 0);
 
-            float[] bottomToBoardModelViewMatrix = new float[16];
-            Matrix.invertM(bottomToBoardModelViewMatrix, 0, boardToBottomModelViewMatrix, 0);
-
-
-            double slopingAngle = getSlopingAngle(bottomModelViewMatrix, boardModelViewMatrix);
-
-
-           //fallingObject.updateBottomOffset(boardToBottomModelViewMatrix);
-
-            if (!fallingObject.isInBoardCoordinate) {
-                fallingObject.isInBoardCoordinate = true;
-                float[] tempMatrix = new float[16];
-
-                Matrix.multiplyMM(tempMatrix, 0
-                        , getRotationMatrix(bottomToBoardModelViewMatrix), 0
-                        , fallingObject.onBottomSelfRotationMatrix, 0);
-//                fallingObject.updateBoardOffset(getRotationMatrix(bottomToBoardModelViewMatrix));
-                fallingObject.onBoardSelfRotationMatrix = tempMatrix.clone();
-            }
-            //Render objects on board coordinate when the object is NOT falling
-            if (!fallingObject.isFalling) {
-                float[] tempModelViewMatrix = boardModelViewMatrix.clone();
-                Matrix.setIdentityM(fallingObject.onBoardSelfRotationMatrix, 0);
-                if (slopingAngle > 90) {
-                    //Fall from board to bottom, change coordinate system
-                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
-                    Log.i(LOGTAG, fallingObject.bottomCenterX + " " + fallingObject.bottomCenterY + " " + fallingObject.bottomCenterZ);
-                    fallingObject.isFalling = true;
-                }
-                else {
-                    render3DObject(tempModelViewMatrix, projectionMatrix, fallingObject, ON_BOARD);
-                    Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
-                    Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
-
-                }
-            }
+                if (!fallingObject.isFalling) {
+                    double slopingAngle = getSlopingAngle(bottomModelViewMatrix, boardModelViewMatrix);
+                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix,pileObject,Object3D.NOT_FALLING);
+                    if (slopingAngle > Const.fallingAngle && fallingObject.ableToFall) fallingObject.isFalling = true;
+                } else {
+                    //if (fallingObject.isControlled) {
+                    if (!fallingObject.leaveBottom) {
+                        fallingObject.leaveBottom = true;
+                        Matrix.multiplyMM(fallingObject.onBoardSelfRotationMatrix, 0
+                                , getRotationMatrix(bottomToBoardModelViewMatrix), 0
+                                , fallingObject.onBottomSelfRotationMatrix, 0);
+                        //fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
+                    }
 
 
-            //Render objects on board coordinate when the object is falling
-            else {
-                float boardCenterInBottomCoordinateX = boardToBottomModelViewMatrix[12];
-                float boardCenterInBottomCoordinateY = boardToBottomModelViewMatrix[13];
-                float boardCenterInBottomCoordinateZ = boardToBottomModelViewMatrix[14];
-
-                double distance = Math.sqrt((fallingObject.bottomCenterX - boardCenterInBottomCoordinateX) * (fallingObject.bottomCenterX - boardCenterInBottomCoordinateX) +
-                        (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) * (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) +
-                        (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ) * (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ));
-
-                Log.i("Distance", distance + ",FalliingObject:" + (fallingObject.bottomCenterX - boardCenterInBottomCoordinateX) +
-                        "," + (fallingObject.bottomCenterY - boardCenterInBottomCoordinateY) +
-                "," + (fallingObject.bottomCenterZ - boardCenterInBottomCoordinateZ) );
-
-                if (distance < 400 && fallingObject.isMoved == false) {
-                    fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
-                    fallingObject.moveCount = 0;
-                    fallingObject.isMoved = true;
-                }
-
-                //When the object is being pushed
-                if (distance < 400 && fallingObject.isMoved && fallingObject.moveCount < 50) {
-                    fallingObject.moveCount++;
-                    float currentX = fallingObject.bottomCenterX;
-                    float currentY = fallingObject.bottomCenterY;
                     float currentZ = fallingObject.bottomCenterZ;
 
-                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
-//                    if(onGround) fallingObject.Z_Bottom=Z_Ground;
-                    if(fallingObject.fallCount==25) {
-                        if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
-                            fallingObject.bottomCenterX = currentX;
-                            fallingObject.bottomCenterY = currentY;
-                            fallingObject.bottomCenterZ = currentZ;
+                    if(fallingObject.boardCenterX>-60-Const.cubeSize/2-Const.cubeSize
+                            && fallingObject.boardCenterX<-60-Const.cubeSize/2)
+                        fallingObject.moveLeft(pileObject);
 
+                    if(fallingObject.boardCenterY>-43-Const.cubeSize/2-Const.cubeSize
+                            && fallingObject.boardCenterY<-43-Const.cubeSize/2)
+                        fallingObject.moveBack(pileObject);
+
+                    if(fallingObject.boardCenterY<43+Const.cubeSize/2+Const.cubeSize
+                            && fallingObject.boardCenterY>43+Const.cubeSize/2)
+                        fallingObject.moveFront(pileObject);
+
+                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix,pileObject,Object3D.FALLING);
+
+                    if (fallingObject.fallCount == Const.fallingInterval) {
+                        if (fallingObject.detectCollision(pileObject) && !fallingObject.isOnGround) {
                             fallingObject.isOnGround = true;
-
-                            ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                            ((PileObject) pileObject).mergeAnObject(fallingObject);
                         } else {
-                            fallingObject.bottomCenterZ = currentZ - Const.cubeSize;
+                            fallingObject.bottomCenterZ =currentZ - Const.cubeSize;
                             fallingObject.fallCount = 0;
                         }
-                    }
-                    else
+                    } else
                     {
-                        fallingObject.fallCount++;
                         fallingObject.bottomCenterZ=currentZ;
+                        fallingObject.fallCount++;
                     }
 
                     fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
                 }
-                //Not being pushed
-                else {
-                    fallingObject.isMoved = false;
-                    fallingObject.moveCount = 50;
 
-                    if(fallingObject.fallCount==25) {
-                        if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
-                            ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
+                if(!fallingObject.isOnGround)
+                    render3DObject(boardModelViewMatrix, projectionMatrix, fallingObject, ON_BOARD);
+
+            } else {
+                if (fallingObject.isFalling) {
+
+                    fallingObject.leaveBottom = false;
+
+                    if (fallingObject.fallCount == Const.fallingInterval) {
+                        if (fallingObject.detectCollision(pileObject) && !fallingObject.isOnGround) {
                             fallingObject.isOnGround = true;
+                            ((PileObject) pileObject).mergeAnObject(fallingObject);
                         } else {
                             fallingObject.bottomCenterZ -= Const.cubeSize;
                             fallingObject.fallCount = 0;
                         }
-                    }
-                    else fallingObject.fallCount++;
+                    } else fallingObject.fallCount++;
 
-                    fallingObject.updateBoardXYZ(boardToBottomModelViewMatrix);
-                    fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix);
-                }
-
-                if(!fallingObject.isOnGround) render3DObject(boardModelViewMatrix.clone(), projectionMatrix, fallingObject, ON_BOARD);
-                Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
-                Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
-
-
-            }
-
-            Matrix.multiplyMM(fallingObject.onBottomSelfRotationMatrix, 0
-                    , getRotationMatrix(boardToBottomModelViewMatrix), 0
-                    , fallingObject.onBoardSelfRotationMatrix, 0);
-            fallingObject.onBottomSelfRotationMatrix = getGridRotationMatrix(fallingObject.onBottomSelfRotationMatrix).clone();
-            //fallingObject.updateBottomOffset(getRotationMatrix(boardToBottomModelViewMatrix));
-        }
-//
-        else if (fallingObject.isFalling && modelViewMap.containsKey("stones")) {
-            float[] bottomModelViewMatrix = modelViewMap.get("stones").getData();
-
-            fallingObject.isMoved = false;
-            fallingObject.moveCount=50;
-            fallingObject.isInBoardCoordinate=false;
-
-            float[] modelViewProjection = new float[16];
-            float[] Projectionmatrix = vuforiaAppSession.getProjectionMatrix().getData();
-
-
-            if(fallingObject.fallCount==25) {
-                if (fallingObject.detectCollision(objectList.get(0)) && !fallingObject.isOnGround) {
-                    ((PileObject) objectList.get(0)).mergeAnObject(fallingObject);
-                    fallingObject.isOnGround = true;
-                } else {
-                    fallingObject.bottomCenterZ -= Const.cubeSize;
-                    fallingObject.fallCount = 0;
+                    if (!fallingObject.isOnGround)
+                        render3DObject(bottomModelViewMatrix, projectionMatrix, fallingObject, ON_BOTTOM);
                 }
             }
-            else fallingObject.fallCount++;
 
-            if(!fallingObject.isOnGround) render3DObject(bottomModelViewMatrix,projectionMatrix,fallingObject,ON_BOTTOM);
-            Log.i(LOGTAG, "Board XYZ:" + fallingObject.boardCenterX + ", " + fallingObject.boardCenterY + ", " + fallingObject.boardCenterZ);
-            Log.i(LOGTAG, "Bottom XYZ:" + fallingObject.bottomCenterX + ", " + fallingObject.bottomCenterY + ", " + fallingObject.bottomCenterZ);
-
-
+            render3DObject(bottomModelViewMatrix, projectionMatrix, pileObject, ON_BOTTOM_GRID);
         }
 
         GLES20.glDisable(GLES20.GL_DEPTH_TEST);
         mRenderer.end();
+    }
+
+    private boolean isInPileBorder(Object3D obj)
+    {
+        for(float[] oneOffset : obj.bottomOffsetList) {
+
+            int indexX = (int)(obj.bottomCenterX/Const.cubeSize)+Const.bottomWidth/2;
+            int indexY = (int)(obj.bottomCenterY/Const.cubeSize)+Const.bottomLength/2;
+            int indexZ = (int)(obj.bottomCenterZ/Const.cubeSize);
+
+            if (indexX<0 || indexX>=Const.bottomWidth
+                    || indexY<0 || indexY>=Const.bottomLength
+                    || indexZ<0 || indexZ>=Const.bottomHeight)
+                return false;
+
+            if(pileObject.pileIsOrNotOccupied.get(indexZ)[indexX][indexY])
+                return false;
+        }
+        return true;
     }
 
     private void multiply(float [][]tempMatrix, float[][]a, int r1,int c1,float[][]b,int r2,int c2)
@@ -565,7 +471,7 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
                 boardOrBottomCenterY = obj.boardCenterY;
                 boardOrBottomCenterZ = obj.boardCenterZ;
                 boardOrBottomSelfRotationMatrix= obj.onBoardSelfRotationMatrix.clone();
-                boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBoardSelfRotationMatrix).clone();
+                //boardOrBottomSelfRotationMatrix = getGridRotationMatrix(obj.onBoardSelfRotationMatrix).clone();
                 break;
             case ON_BOTTOM:
                 boardOrBottomOffsetList = new ArrayList<>(obj.boardOffsetList);
@@ -582,19 +488,27 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
         if(mode == ON_BOTTOM_GRID)
             for (int[] offset :obj.offsetList){
                 int color;
-                if (offset[2]%2 ==0 ){
-                if ((offset[0]+offset[1])%2 == 0) color =1;
-                else color = 2;}
-                else {
-                    if ((offset[0]+offset[1])%2 == 0) color =2;
-                    else color = 1;
-                }
-                float[] newModelViewMatrixCopy  = modelViewMatrixCopy.clone();
 
-                Matrix.translateM(newModelViewMatrixCopy, 0, (obj.centerX + offset[0]) * Const.cubeSize, (obj.centerY + offset[1]) * Const.cubeSize,
-                        (obj.centerZ + offset[2]) * Const.cubeSize);
-                Matrix.scaleM(newModelViewMatrixCopy, 0, OBJECT_SCALE_FLOAT,
-                        OBJECT_SCALE_FLOAT, OBJECT_SCALE_FLOAT);
+
+                if(offset[2]>11)
+                {
+                    color=offset[2]-6*2;
+                }
+                else if(offset[2]>5)
+                {
+                    color=offset[2]-6;
+                }
+                else
+                {
+                    color=offset[2];
+                }
+
+
+                float[] newModelViewMatrixCopy  = new float[16];
+                Matrix.multiplyMM(newModelViewMatrixCopy, 0,
+                        modelViewMatrix,0,
+                        getTranslationMatrix((offset[0]) * Const.cubeSize, (offset[1]) * Const.cubeSize,
+                        (offset[2]) * Const.cubeSize), 0);
 
                 float[] modelViewProjectionMatrix = new float[16];
                 Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, newModelViewMatrixCopy, 0);
@@ -637,6 +551,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
                 float[] newModelViewMatrix = new float[16];
                 Matrix.multiplyMM(newModelViewMatrix,
                         0, modelViewMatrix, 0, tempMatrix3, 0);
+
+                //Matrix.multiplyMM(tempMatrix, 0, getAutoRotationMatrix(autoRotateAngle), 0, newModelViewMatrix.clone(), 0);
 
                 float[] modelViewProjectionMatrix = new float[16];
                 Matrix.multiplyMM(modelViewProjectionMatrix, 0, projectionMatrix, 0, newModelViewMatrix, 0);
@@ -939,83 +855,16 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
         return temp;
     }
 
-    float[] getGridRotationMatrix(float[] rotationMatrix)
+    float[] getAutoRotationMatrix(float angle)
     {
-        double cosThetaX=rotationMatrix[0]/Math.sqrt(rotationMatrix[0] * rotationMatrix[0]
-                +rotationMatrix[1]*rotationMatrix[1]+rotationMatrix[2]*rotationMatrix[2]);
-        double cosThetaY=rotationMatrix[5]/Math.sqrt(rotationMatrix[4] * rotationMatrix[4]
-                +rotationMatrix[5]*rotationMatrix[5]+rotationMatrix[6]*rotationMatrix[6]);
-        double cosThetaZ=rotationMatrix[10]/Math.sqrt(rotationMatrix[8] * rotationMatrix[8]
-                +rotationMatrix[9]*rotationMatrix[9]+rotationMatrix[10]*rotationMatrix[10]);
+        float[] autoRotationMatrix=new float[16];
+        Matrix.setIdentityM(autoRotationMatrix,0);
 
-        boolean[] axisIsTaken=new boolean[6];
-        float[]  destAxisX= getGridAxisVector(rotationMatrix[0], rotationMatrix[1], rotationMatrix[2],axisIsTaken);
-        axisIsTaken = getNewAxisIsTaken(axisIsTaken, destAxisX);
-        float[]  destAxisY = getGridAxisVector(rotationMatrix[4],rotationMatrix[5],rotationMatrix[6],axisIsTaken);
-        axisIsTaken = getNewAxisIsTaken(axisIsTaken, destAxisY);
-        float[]  destAxisZ = getGridAxisVector(rotationMatrix[8],rotationMatrix[9],rotationMatrix[10],axisIsTaken);
+        autoRotationMatrix[0]=(float)Math.cos(angle / 180 * Math.PI);
+        autoRotationMatrix[1]=(float)Math.sin(angle / 180 * Math.PI);
+        autoRotationMatrix[4]=-(float)Math.sin(angle/180*Math.PI);
+        autoRotationMatrix[5]=(float)Math.cos(angle/180*Math.PI);
 
-        float[] gridRotationMatrix=new float[16];
-        Matrix.setIdentityM(gridRotationMatrix,0);
-
-        gridRotationMatrix[0]=destAxisX[0];
-        gridRotationMatrix[1]=destAxisX[1];
-        gridRotationMatrix[2]=destAxisX[2];
-
-        gridRotationMatrix[4]=destAxisY[0];
-        gridRotationMatrix[5]=destAxisY[1];
-        gridRotationMatrix[6]=destAxisY[2];
-
-        gridRotationMatrix[8]=destAxisZ[0];
-        gridRotationMatrix[9]=destAxisZ[1];
-        gridRotationMatrix[10]=destAxisZ[2];
-
-        Log.i(LOGTAG,gridRotationMatrix[0]+" "+gridRotationMatrix[1]+" "+gridRotationMatrix[2]
-                +" "+gridRotationMatrix[4]+" "+gridRotationMatrix[5]+" "+gridRotationMatrix[6]
-                +" "+gridRotationMatrix[8]+" "+gridRotationMatrix[9]+" "+gridRotationMatrix[10]);
-
-        return gridRotationMatrix;
-    }
-
-    private boolean[] getNewAxisIsTaken(boolean[] axisIsTaken, float[] destAxis) {
-        if(destAxis[0]!=0) {
-            axisIsTaken[0] = true;
-            axisIsTaken[1] = true;
-        }
-        else if(destAxis[1]!=0) {
-            axisIsTaken[2] = true;
-            axisIsTaken[3] = true;
-        }
-        else
-        {
-            axisIsTaken[4] = true;
-            axisIsTaken[5] = true;
-        }
-        return axisIsTaken;
-    }
-
-    float[] getGridAxisVector(float x,float y,float z,boolean[] axisIsTaken)
-    {
-        float max=-2;
-        float[] destAxisVector=new float[3];
-        double length=Math.sqrt(x*x+y*y+z*z);
-
-        if(!axisIsTaken[0] && !axisIsTaken[1])
-        {
-            if(x*1.0/length>max) {destAxisVector[0]=1;destAxisVector[1]=0;destAxisVector[2]=0;max=x;}
-            if(-x*1.0/length>max) {destAxisVector[0]=-1;destAxisVector[1]=0;destAxisVector[2]=0;max=-x;}
-        }
-        if(!axisIsTaken[2] && !axisIsTaken[3])
-        {
-            if(y*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=1;destAxisVector[2]=0;max=y;}
-            if(-y*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=-1;destAxisVector[2]=0;max=-y;}
-        }
-        if(!axisIsTaken[4] && !axisIsTaken[5])
-        {
-            if(z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[2]=1;max=z;}
-            if(-z*1.0/length>max) {destAxisVector[0]=0;destAxisVector[1]=0;destAxisVector[2]=-1;max=-z;}
-        }
-
-        return destAxisVector;
+        return autoRotationMatrix;
     }
 }

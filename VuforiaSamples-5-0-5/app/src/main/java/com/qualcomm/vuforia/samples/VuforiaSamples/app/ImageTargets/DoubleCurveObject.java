@@ -16,14 +16,14 @@ public class DoubleCurveObject extends Object3D {
 
         List<int[]> doublecurveOffsetList =new ArrayList<int[]>();
         doublecurveOffsetList.add(new int[]{0, 0, 0});
-        doublecurveOffsetList.add(new int[]{0, 0, 1});
+        doublecurveOffsetList.add(new int[]{2, 0, 0});
         doublecurveOffsetList.add(new int[]{1, 0, 0});
         doublecurveOffsetList.add(new int[]{0, 1, 0});
         this.offsetList = doublecurveOffsetList;
 
         List<float[]> onBoardOffsetList =new ArrayList<float[]>();
         onBoardOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
-        onBoardOffsetList.add(new float[]{0, 0, 1});
+        onBoardOffsetList.add(new float[]{2, 0, 0});
         onBoardOffsetList.add(new float[]{1, 0, 0});
         onBoardOffsetList.add(new float[]{0, 1, 0});
         this.boardOffsetList = onBoardOffsetList;
@@ -31,7 +31,7 @@ public class DoubleCurveObject extends Object3D {
 
         List<float[]> onBottomOffsetList =new ArrayList<float[]>();
         onBottomOffsetList.add(new float[]{0.0f, 0.0f, 0.0f});
-        onBottomOffsetList.add(new float[]{0, 0, 1});
+        onBottomOffsetList.add(new float[]{2, 0, 0});
         onBottomOffsetList.add(new float[]{1, 0, 0});
         onBottomOffsetList.add(new float[]{0, 1, 0});
         this.bottomOffsetList =onBottomOffsetList;
