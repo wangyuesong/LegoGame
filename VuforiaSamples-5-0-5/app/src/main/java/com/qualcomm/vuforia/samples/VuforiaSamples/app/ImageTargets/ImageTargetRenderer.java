@@ -23,6 +23,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.util.Log;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 
 import com.qualcomm.vuforia.CameraCalibration;
@@ -46,7 +47,7 @@ import com.qualcomm.vuforia.samples.SampleApplication.utils.Texture;
 import com.qualcomm.vuforia.samples.VuforiaSamples.R;
 
 // The renderer class for the ImageTargets sample.
-public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClickListener
+public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClickListener, CompoundButton.OnCheckedChangeListener
 {
     private static final String LOGTAG = "ImageTargetRenderer";
 
@@ -236,12 +237,13 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
         return tempObject;
     }
 
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        manualSwitch = !manualSwitch;
+    }
     @Override
     public void onClick(View v) {
         if(fallingObject.isFalling) {
             switch (v.getId()) {
-                case R.id.drop:
-                    fallingObject.drop(pileObject);
                 case R.id.up:
                     fallingObject.moveFront(pileObject);
                     break;
@@ -261,7 +263,8 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
 
     Object3D pileObject;
     Object3D fallingObject = new CurveObject(0,0,0,1);
-
+    private boolean manualSwitch=true;
+    int score = 0;
     private void renderFrame() {
         if(!fallingObject.ableToFall && !fallingObject.isFalling){
             final TextView tv = (TextView) mActivity.findViewById(R.id.indicator);
@@ -290,7 +293,17 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
         if (fallingObject.isOnGround) {
             fallingObject = randomObjectList[new Random().nextInt(randomObjectList.length)];
         }
-        ((PileObject) pileObject).elimate();
+        boolean result = ((PileObject) pileObject).elimate();
+        if(result){
+            score += 100;
+            final TextView tv = (TextView) mActivity.findViewById(R.id.score);
+            tv.post(new Runnable() {//另外一种更简洁的发送消息给ui线程的方法。
+                @Override
+                public void run() {//run()方法会在ui线程执行
+                    tv.setText("Score:" + score);
+                }
+            });
+        }
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         State state = mRenderer.begin();
@@ -340,17 +353,54 @@ public class ImageTargetRenderer implements GLSurfaceView.Renderer, View.OnClick
 
                     float currentZ = fallingObject.bottomCenterZ;
 
-                    if(fallingObject.boardCenterX>-60-Const.cubeSize/2-Const.cubeSize
-                            && fallingObject.boardCenterX<-60-Const.cubeSize/2)
-                        fallingObject.moveLeft(pileObject);
+                    float boardCenterInBottomCoordinateX=boardToBottomModelViewMatrix[12];
+                    float boardCenterInBottomCoordinateY=boardToBottomModelViewMatrix[13];
+                    float boardCenterInBottomCoordinateZ=boardToBottomModelViewMatrix[14];
 
-                    if(fallingObject.boardCenterY>-43-Const.cubeSize/2-Const.cubeSize
-                            && fallingObject.boardCenterY<-43-Const.cubeSize/2)
-                        fallingObject.moveBack(pileObject);
+                    if(manualSwitch) {
+                        if (fallingObject.moveCount == Const.moveInterval) {
+//                        if (fallingObject.boardCenterX > -60 - Const.cubeSize / 2 - Const.cubeSize * 2
+//                                && fallingObject.boardCenterX < -60)
+//                            fallingObject.moveLeft(pileObject);
+//
+//                        if (fallingObject.boardCenterX < 60 + Const.cubeSize / 2 + Const.cubeSize * 2
+//                                && fallingObject.boardCenterX > 60)
+//                            fallingObject.moveRight(pileObject);
+//
+//                        if (fallingObject.boardCenterY > -43 - Const.cubeSize / 2 - Const.cubeSize * 2
+//                                && fallingObject.boardCenterY < -43)
+//                            fallingObject.moveBack(pileObject);
+//
+//                        if (fallingObject.boardCenterY < 43 + Const.cubeSize / 2 + Const.cubeSize * 2
+//                                && fallingObject.boardCenterY > 43)
+//                            fallingObject.moveFront(pileObject);
+//
 
-                    if(fallingObject.boardCenterY<43+Const.cubeSize/2+Const.cubeSize
-                            && fallingObject.boardCenterY>43+Const.cubeSize/2)
-                        fallingObject.moveFront(pileObject);
+                            if (boardCenterInBottomCoordinateX - fallingObject.lastCenterX > Const.cubeSize
+                                    /4.0f*3.0f
+                                    )
+                                fallingObject.moveRight(pileObject);
+                            if (fallingObject.lastCenterX - boardCenterInBottomCoordinateX > Const.cubeSize
+                            /4.0f*3.0f
+                            )
+                                fallingObject.moveLeft(pileObject);
+                            if (boardCenterInBottomCoordinateY - fallingObject.lastCenterY > Const.cubeSize
+                                    /4.0f*3.0f
+                                    )
+                                fallingObject.moveFront(pileObject);
+                            if (fallingObject.lastCenterY - boardCenterInBottomCoordinateY > Const.cubeSize
+                                    /4.0f*3.0f
+                                    )
+                                fallingObject.moveBack(pileObject);
+
+                            fallingObject.lastCenterX = boardCenterInBottomCoordinateX;
+                            fallingObject.lastCenterY = boardCenterInBottomCoordinateY;
+                            fallingObject.lastCenterZ = boardCenterInBottomCoordinateZ;
+
+                        } else {
+                            fallingObject.moveCount++;
+                        }
+                    }
 
                     fallingObject.updateBottomXYZ(boardToBottomModelViewMatrix,pileObject,Object3D.FALLING);
 
