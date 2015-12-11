@@ -149,9 +149,9 @@
                                     </ul></p>
                                 </p>
                                 <p>
-                                    After we finished all the above aspects, we do the integration together. The most challenging part of integration comes from how to adapt teapot manipulation system to tetris, which consists of multiple objects. 
+                                    After we finished all the above aspects, we do the integration together. The most challenging part of integration comes from how to adapt teapot manipulation system to tetris, which consists of multiple objects(cubes). 
                                     We come up with several strategies, but the only one working out is that we need to set a center for each tetris and record the offset of the center of each cube(consisting tetris) in terms of the
-                                    pre-set center. When doing rendering, we first find the center position of tetris and then rotate the different cube around the center by the offset radius. In OpenGL, the order should be: translate to offset position->rotate around origin using updated rotation matrix->translate the origin to the 
+                                    pre-set center. When doing rendering, we first find the center position of tetris and then rotate the different cube around the center by the offset radius. In OpenGL, the order should be: translate to offset position -> rotate around origin using updated rotation matrix -> translate the origin to the 
                                     updated center position.
                                 </p>
                                 
@@ -165,13 +165,13 @@
                                 
                                 <p>
                                     As for the horizontal movement control, we did go through a hard time. At first, we used a method similar with HW3 -- distance detection.
-                                    That is, the board is close enough to tetris, the tetris would move with the board. But the algorithm is not robust enough, since the distance
+                                    That is, when the board is close enough to tetris, the tetris would move with the board. But the algorithm is not robust enough, since the distance
                                     would vary in a quite large range even if the tetris "seems" to be close enough. The optimized solution we currently adopted is to use the movement of
-                                    the marker board to guide movement of tetris(details in the section below). We also add an alternative sets of screen button to help with manipulation. 
+                                    the marker board to guide movement of tetris(detailed in the section below). We also add an alternative set of screen buttons to help with manipulation. 
                                 </p>
                                 
                                 <p>
-                                    We also deal with many problems, such as sloping angle detection, border detection, stated in details in latter sections.
+                                    We also deal with many other issues, such as sloping angle detection, border detection, which are stated in details in latter sections.
                                 </p>
                                 
                             </p>
