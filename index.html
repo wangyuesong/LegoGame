@@ -225,9 +225,11 @@
                                     <h4>(2)Manipulate tetris movement using board</h5>
                                     <p></p>
                                         <h5><b>Rotation</b></h5>
-                                        <p> Scenarios: a) When the board appears, the tetris would rotate with the board synchronously.                             
-                                                       b) When the board disappears, the tetris would fit into the closest 90-degree grid position.
-                                                       c) When the tetris lands on piles, it need to rotate into a 90-degree pose to fit into grid settings.</p>                    
+                                        <p> Scenarios:</p> 
+                                        <p>a) When the board appears, the tetris would rotate with the board synchronously.</p>                             
+                                        <p>b) When the board disappears, the tetris would fit into the closest 90-degree grid position.</p>
+                                        <p>c) When the tetris lands on piles, it need to rotate into a 90-degree pose to fit into grid settings.</p>                    
+                                        
                                         <p>Implementation: when the board appears, render tetris within board coordinate(only rotate with board), but update the tetris 90-degree self-rotation matrix under bottom coordinates according to the current boardToBottomModelViewMatrix.  This could achieve continuous rotation on board and grid rotation when the board moves out of screen. Great visual effects! </p>
                                         
                                         <h5><b>Move front/back/left/right</b>   </h5>  
@@ -243,11 +245,11 @@
                                     </p>
 
                                     <p class="section-paragraph">
-                                        <h4>(4)Boarder Detection</h4>
+                                        <h4>(4)Border Detection</h4>
                                         <h5>Scenarios:  </h5>
-                                        <p> 1) When the tetris first appear on board, it needs to be within the border to be able to fall from the board; </p>
-                                        <p> 2) When the board manipulates the tetris to move in the air, it must be moved within the border; </p>
-                                        <p>3) When the board manipulates the tetris to do rotation, it needs to be always within the border. </p>    
+                                        <p> a) When the tetris first appear on board, it needs to be within the border to be able to fall from the board; </p>
+                                        <p> b) When the board manipulates the tetris to move in the air, it must be moved within the border; </p>
+                                        <p> c) When the board manipulates the tetris to do rotation, it needs to be always within the border. </p>    
 
                                     </p>
                                     <h5>Implementation: </h5>
