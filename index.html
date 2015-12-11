@@ -210,7 +210,7 @@
                             <h1 class="section-heading">Technical Details</h1>
                             <p class="lead section-lead">Details about graphics and game control</p>
                             <p class="section-paragraph">
-                                <h4> (1)Sloping Angle Detection </h5>
+                                <h4> 1. Sloping Angle Detection </h5>
                                     <ul class="list-group">
                                         <li class="list-group-item">1.Extract camera rotation matrix from modelview transition matrix(both board(‘chips’) and bottom(‘stones’))</li>
                                         <li class="list-group-item">2.Calculate quanterion of camera rotation matrix and derive euler angles</li>
@@ -222,8 +222,9 @@
 
 
                                 <p class="section-paragraph">
-                                    <h4>(2)Manipulate tetris movement using board</h5>
+                                    <h4> 2. Manipulate tetris movement using board</h5>
                                     <p></p>
+                                    <br/>
                                         <h5><b>Rotation</b></h5>
                                         <p> Scenarios:</p> 
                                         <p>a) When the board appears, the tetris would rotate with the board synchronously.</p>                             
@@ -238,14 +239,14 @@
 
 
                                     <p class="section-paragraph">
-                                        <h4>(3)Collision Detection</h4>
+                                        <h4> 3. Collision Detection</h4>
                                         We set a maximum height for the piles accumulated on the bottom for each (Xgrid,Ygrid) coordinate. The tetris would fall for length of one side of the cube every 45 frames. When the height of tetris lowers down to the maximum height in terms of the  (Xgrid,Ygrid) coordinate it is currently at, it would be merged into the piles. And the next tetris would be generated on the board.
 
 
                                     </p>
 
                                     <p class="section-paragraph">
-                                        <h4>(4)Border Detection</h4>
+                                        <h4> 4. Border Detection</h4>
                                         <h5>Scenarios:  </h5>
                                         <p> a) When the tetris first appear on board, it needs to be within the border to be able to fall from the board; </p>
                                         <p> b) When the board manipulates the tetris to move in the air, it must be moved within the border; </p>
