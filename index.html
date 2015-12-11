@@ -244,26 +244,33 @@
                                 <h1 class="page-header">1. Project Structure & OOP Design</h1>
                             </div>
 
-                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                            <div class="col-lg-4 col-md-4 col-xs-4 thumb">
                                 <a class="thumbnail" href="#">
                                     <img class="img-responsive" src="image/FileStructure.png" alt="">
                                 </a>
                                 <h4>FileSturecute</h4>
                             </div>
-                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                            <div class="col-lg-4 col-md-4 col-xs-4 thumb">
                                 <a class="thumbnail" href="#">
                                     <img class="img-responsive" src="image/ImageTargetRenderer.png" alt="">
                                 </a>
                                 <h4>Main Logic Class</h4>
                             </div>
-                             <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                             <div class="col-lg-4 col-md-4 col-xs-4 thumb">
                                 <a class="thumbnail" href="#">
                                     <img class="img-responsive" src="image/Object3D.png" alt="">
                                 </a>
                                 <h4>Base Object Class</h4>
                             </div>
-                           
+
                         </div>
+
+                        <p>
+                          <h5> Just some introspection on our design process:   </h5>
+At the beginning we were thinking about rendering different kinds of Tetris cubes natively using OpenGL, like Teapot and Cube objects in sample project . Also the fall-down of the object should like an animation, changing position in a frame-by-frame basis. But then we find this implementation is hard concerning about the collision between the cubes. So we think over and realized that the whole logic of the Tetris is actually discrete. Every object is made up by unit cubes and their movements are also discrete. So we decided to use CubeObject as our unit cube and all the other kinds of objects are going to be build by the combination of unit object. Meanwhile, it took us a long time to decide how to represent the object’s location in our 3D coordinate system. We were thinking about record every unit cube’s absolute location in our coordinate system, but after a second thought we realized that this implementation is an obstacle for the implementation of rotation on the object. We then decided only record the absolute coordinate of the center of the object and for the rest part of the project we just record the relative offset compared with the center cube. This implementation greatly facilitate our future works on the rotation and other series of integration process. We have noticed that a great design at the beginning is half way to success.
+
+
+                           </p>
                             </p>
                             
                             <div class="col-lg-12">
