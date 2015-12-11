@@ -109,6 +109,28 @@
                 </div>
                 <!-- /.container -->
             </section>
+            
+                            <hr/>
+                <section>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h1 class="section-heading">Game Rule</h1>
+                                <p class="lead section-lead">How to play</p>
+                                <p class="section-paragraph">
+                                   <ul class="list-group">
+                                    <li class="list-group-item">1.Relase tetris from the marker board.</li>
+                                    <li class="list-group-item">2.Manipulate tetris movement (360-degree rotation and horizontal translation) using the same marker board. </li>
+                                    <li class="list-group-item">3.Alternatively manipulate tetris movement (only horizontal translation) using screen buttons.</li>
+                                    <li class="list-group-item">4.Eliminate a layer when it is full. Get 100 points for each elimination.
+                                    </li>
+                                </ul>       
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
             <hr/>
             <section>
                 <div class="container">
@@ -151,16 +173,16 @@
                                 <p>
                                     After we finished all the above aspects, we do the integration together. The most challenging part of integration comes from how to adapt teapot manipulation system to tetris, which consists of multiple objects(cubes). 
                                     We come up with several strategies, but the only one working out is that we need to set a center for each tetris and record the offset of the center of each cube(consisting tetris) in terms of the
-                                    pre-set center. When doing rendering, we first find the center position of tetris and then rotate the different cube around the center by the offset radius. In OpenGL, the order should be: translate to offset position -> rotate around origin using updated rotation matrix -> translate the origin to the 
-                                    updated center position.
+                                    pre-set center. When doing rendering, we first find the center position of tetris and then rotate the different cube around the center by the offset radius. In OpenGL, the order should be: <b>translate to offset position -> rotate around origin using updated rotation matrix -> translate the origin to the 
+                                    updated center position.</b>
                                 </p>
                                 
                                 <p>
                                     Another issue with tetris manipulation is that, different from teapot, tetris could only rotate to 90-degree position to fit into regular grids.
                                     We managed to find the closest 90-degree pose for each non-grid rotation by calculating the angles between rotated axis and original coordinate axis. But we do not
                                     want to dump continous rotation completely, as it could significantly increase the immersion of user experience. So, we end up with adopting two types of rotation matrix under 
-                                    three circumstances: a) when the board is manipulating tetris, use continuous rotation; b) when the board disappears, use 90-degree grid rotation; c) when the tetris land on piles,
-                                    use 90-degree grid rotaion.
+                                    three circumstances: <b>a) when the board is manipulating tetris, use continuous rotation; b) when the board disappears, use 90-degree grid rotation; c) when the tetris land on piles,
+                                    use 90-degree grid rotaion.</b>
                                 </p>
                                 
                                 <p>
@@ -179,27 +201,6 @@
                         </div>
                     </div>
                 </section>
-
-                <hr/>
-                <section>
-                    <div class="container">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <h1 class="section-heading">Game Rule</h1>
-                                <p class="lead section-lead">How to play</p>
-                                <p class="section-paragraph">
-                                   <ul class="list-group">
-                                    <li class="list-group-item">1.Relase tetris from the marker board.</li>
-                                    <li class="list-group-item">2.Manipulate tetris movement (360-degree rotation and horizontal translation) using the same marker board. </li>
-                                    <li class="list-group-item">3.Alternatively manipulate tetris movement (only horizontal translation) using screen buttons.</li>
-                                    <li class="list-group-item">4.Eliminate a layer when it is full. Get 100 points for each elimination.
-                                    </li>
-                                </ul>       
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             <hr/>
             <section>
