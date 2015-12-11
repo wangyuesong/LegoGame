@@ -95,13 +95,13 @@
 
                         <p class="section-paragraph">Here is the list of our goals</p>
                         <p class="section-paragraph"><ul class="list-group">
-                            <li class="list-group-item">1.Render multiple types of tetris</li>
-                            <li class="list-group-item">2.Sloping angle (between bottom and board) detection</li>
+                            <li class="list-group-item">1.Render multiple types of tetris.</li>
+                            <li class="list-group-item">2.Sloping angle (between bottom and board) detection.</li>
                             <li class="list-group-item">3.Rotate tetris and move tetris horizontally using marker board (especially, achieve continuous rotation when manipulated by board to increase reality of user experience
-                                )</li>
-                                <li class="list-group-item">4.Collision detection (when to land tetris)
+                                ).</li>
+                                <li class="list-group-item">4.Collision detection (when to land tetris).
                                 </li>
-                                <li class="list-group-item">5.Border detection (whatever movements should not place tetris beyond border)</li>
+                                <li class="list-group-item">5.Border detection (whatever movements should not place tetris beyond border).</li>
                             </ul></p>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <h1 class="section-heading">Tools and Development Process</h1>
-                            <!--<p class="lead section-lead">Tools for our project</p>-->
+                            <p class="lead section-lead">Tools for our project</p>
                             <p class="section-paragraph">
                                 <p>
                                     For our tetris game, we used Qualcomm's AR software development kit Vuforia SDK and and OpenGL ES 2.0 on Android 5.0.1 mobile devices.
@@ -123,14 +123,11 @@
                                     Vuforia SDK provided toolkits of tracking a specific image, known as the image target, as well as information about the camera's gestures and positions represented as a modelview matrix. This could then be used to place virtual objects onto the image target in terms of the image target coordinate. We used OpenGL ES to render the graphics for different types of tetris. (We didn’t use Unity, though it is widely known to take care of everything. But implementing by ourselves is fun!)
 
                                 </p>
-                                <p>We worked in the Graphic part and the control part in parallel.
-                                    For the Graphic part, we can render the Tetris base with 2 defaulted layers which can be used for eliminating use. Also, we created different shapes of falling Tetris object. After one layer is eliminated, a random falling Tetris object is generated, and falls from the the location of (2,2,15) which is the center entrance of the 3D Tetris game space. Using the control buttons on the screen, we can move the falling object in horizontal plane. For each (50??) frame, the falling object will move down forward for one step.
-                                    In parallel, we work on the control part. Instead of using the model we were creating at the same time, we used a teapot replacing the Tetris models. We used the marker board to manipulate the rotation and translation of the teapot on the center of the marker board, so that it can go along with the movement of the teapot. Also, after we detect the sloping angle between the marker board and marker bottom is more than one threshold, the teapot would be dumped into the marker bottom plane and begins to fall down by one step each (50??) frames.</p>
-                                    <p>
+                            
+                                <p>
                                         After we finished both two parts, we integrated them together. Since the model we created is not similar with the teapot model. We took time to solve the rotation problem of each auto-cube in the Tetris object to make them rotate and translate in constant. Finally, we added extra interaction functions, such as allowing user to switch from the screen button manipulating mode to marker board manipulating mode.
-
-                                    </p>
                                 </p>
+                            </p>
                             </div>
                         </div>
                     </div>
@@ -147,7 +144,7 @@
                                    <ul class="list-group">
                                     <li class="list-group-item">1.Relase tetris from the marker board.</li>
                                     <li class="list-group-item">2.Manipulate tetris movement (360-degree rotation and horizontal translation) using the same marker board. </li>
-                                    <li class="list-group-item">3.Alternatively manipulate tetris movement(only horizontal translation) using screen buttons.</li>
+                                    <li class="list-group-item">3.Alternatively manipulate tetris movement (only horizontal translation) using screen buttons.</li>
                                     <li class="list-group-item">4.Eliminate a layer when it is full. Get 100 points for each elimination.
                                     </li>
                                 </ul>       
