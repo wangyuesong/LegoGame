@@ -1,2 +1,0 @@
-# LegoGame
-CS290i
