@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>3D Tetris</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/full-width-pics.css" rel="stylesheet">
+    <lint href="css/thumbnail-gallery.css" rel="stylesheet">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+    </head>
+
+    <body>
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <div class="container">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="#">Tetris 3D</a>
+                </div>
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul class="nav navbar-nav">
+                        <li>
+                            <a href="#">About</a>
+                        </li>
+                        <li>
+                            <a href="#">Services</a>
+                        </li>
+                        <li>
+                            <a href="#">Contact</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- /.navbar-collapse -->
+            </div>
+            <!-- /.container -->
+        </nav>
+
+        <!-- Full Width Image Header with Logo -->
+        <!-- Image backgrounds are set within the full-width-pics.css file. -->
+        <header class="image-bg-fluid-height">
+            <img class="img-responsive img-center" src="http://placehold.it/200x200&text=Logo" alt="">
+        </header>
+
+        <!-- Content Section -->
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="section-heading">Overview</h1>
+                        <p class="lead section-lead">3D Tetris in a nutshell</p>
+                        <p class="section-paragraph">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aliquid, suscipit, rerum quos facilis repellat architecto commodi officia atque nemo facere eum non illo voluptatem quae delectus odit vel itaque amet.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Fixed Height Image Aside -->
+        <!-- Image backgrounds are set within the full-width-pics.css file. -->
+        <aside class="image-bg-fixed-height"></aside>
+
+        <!-- Content Section -->
+        <section>
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="section-heading">Motivation and goals</h1>
+                        <p class="lead section-lead">What and why</p>
+                        <p class="section-paragraph">Traditional 2D Tetris Game is an HCI-based application, with only two horizontal movement options (‘left’ and ‘right’) and four 90-degree rotation options. We created a 3D interface-based Tetris Game embedded on a marker in the real world. The main challenges for 3D Tetris Game design is that: 3D tetris is of 4 types of horizontal movements and up to 24 90-degree rotation gestures. We creatively imported Augmented Reality techniques here to increase interaction for users to ‘physically’ manipulate tetris gestures and positions. In our tetris game, the user could actually use a single board with special patterns to complete all these otherwise intricate controls if implemented using screen buttons. Our inspiration comes from the well-designed augmented reality project--ARToolkit furniture interaction <a href="https://www.dropbox.com/s/3f83y9dbpallwpi/isar2001-VOMAR-4.mov?dl=0">Link</a>.</p>
+                        <p class="section-paragraph">With the help of Vuforia SDK, we are able to finish feature detection and feature tracking and obtain transition modelview matrix between cameras and markers in the very first place.</p>
+
+                        <p class="section-paragraph">Here is the list of our project goals</p>
+                        <p class="section-paragraph"><ul class="list-group">
+                            <li class="list-group-item">1.Render multiple types of tetris</li>
+                            <li class="list-group-item">2.Sloping angle(between bottom and board) detection</li>
+                            <li class="list-group-item">3.Rotate tetris and move tetris horizontally using marker board: (Continuous rotation when manipulated by board to increase      reality of user experience
+                                )</li>
+                                <li class="list-group-item">4.Collision detection(when to land tetris)
+                                </li>
+                                <li class="list-group-item">5.Border detection(whatever movements should not place tetris beyond border)</li>
+                            </ul></p>
+                        </div>
+                    </div>
+                    <!-- /.row -->
+                </div>
+                <!-- /.container -->
+            </section>
+            <hr/>
+            <section>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="section-heading">Tools and Development Process</h1>
+                            <p class="lead section-lead">Tools for our project</p>
+                            <p class="section-paragraph">
+                                <p>
+                                    For our tetris game, we used Qualcomm's augmented reality software development kit Vuforia SDK and and OpenGL ES 2.0 on Android 5.0.1 mobile devices.
+
+                                    Vuforia SDK provided toolkits of tracking a specific image, known as the image target, as well as information about the camera's gestures and positions represented as a modelview matrix. This could then be used to place virtual objects onto the image target in terms of the image target coordinate. We used OpenGL ES to render the graphics for different types of tetris. (We didn’t use Unity, though it is widely known to take care of everything. But implementing by ourselves is fun!)
+
+                                </p>
+                                <p>We worked in the Graphic part and the control part in parallel.
+                                    For the Graphic part, we can render the Tetris base with 2 defaulted layers which can be used for eliminating use. Also, we created different shapes of falling Tetris object. After one layer is eliminated, a random falling Tetris object is generated, and falls from the the location of (2,2,15) which is the center entrance of the 3D Tetris game space. Using the control buttons on the screen, we can move the falling object in horizontal plane. For each (50??) frame, the falling object will move down forward for one step.
+                                    In parallel, we work on the control part. Instead of using the model we were creating at the same time, we used a teapot replacing the Tetris models. We used the marker board to manipulate the rotation and translation of the teapot on the center of the marker board, so that it can go along with the movement of the teapot. Also, after we detect the sloping angle between the marker board and marker bottom is more than one threshold, the teapot would be dumped into the marker bottom plane and begins to fall down by one step each (50??) frames.</p>
+                                    <p>
+                                        After we finished both two parts, we integrated them together. Since the model we created is not similar with the teapot model. We took time to solve the rotation problem of each auto-cube in the Tetris object to make them rotate and translate in constant. Finally, we added extra interaction functions, such as allowing user to switch from the screen button manipulating mode to marker board manipulating mode.
+
+                                    </p>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <hr/>
+                <section>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <h1 class="section-heading">Game Rule</h1>
+                                <p class="lead section-lead">How to play</p>
+                                <p class="section-paragraph">
+                                   <ul class="list-group">
+                                    <li class="list-group-item">1.Relase tetris from the marker board.</li>
+                                    <li class="list-group-item">2.Manipulate tetris movement (360 degree rotation and horizontal translation) using the same marker board. </li>
+                                    <li class="list-group-item">3.Use the screen control button to control the  movement of object on the horizontal plane. (Alternative)</li>
+                                    <li class="list-group-item">4.Eliminate a layer when it is full. Get 100 score for each elimination.
+                                    </li>
+                                </ul>       
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <hr/>
+            <section>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <h1 class="section-heading">Technical Details</h1>
+                            <p class="lead section-lead">Details about game control and graphic</p>
+                            <h3>Control</h3>
+                            <p class="section-paragraph">
+                                <h4> (1)Sloping Angle Detection </h5>
+                                    <ul class="list-group">
+                                        <li class="list-group-item">1.Extract camera rotation matrix from modelview transition matrix(both board(‘chips’) and bottom(‘stones’))</li>
+                                        <li class="list-group-item">2.Calculate quanterion of camera rotation matrix and derive euler angles</li>
+                                        <li class="list-group-item">3.Calculate the anglebetween the board and the bottom using two sets of euler angles cos=coscos'+coscos'+coscos')</li>
+                                        <li class="list-group-item">4.When the angle is greater than 90 degree, release the object from the board
+                                        </li>
+                                    </ul>                                          
+                                </p>
+
+
+                                <p class="section-paragraph">
+                                    <h4>(2)Manipulate tetris using board</h5>
+                                        <h5>Rotation:</h5>
+                                        <p> Scenarios: When the board appears, the tetris would rotate with the board synchronously.                                              When the board disappears, the tetris would fit into the closest 90-degree grid position.</p>                                                                                                                   <p>Implementation: when the board appears, render tetris within board coordinate(only rotate with board), but update the tetris 90-degree self-rotation matrix under bottom coordinates according to the current boardToBottomModelViewMatrix.  This could achieve continuous rotation on board and grid rotation when the board moves out of screen. Great visual effects! </p>
+
+                                        <h5>Move front/back/left/right   </h5>                                                                                        Implementation: when the board appears, the tetris would move synchronously with the board, BUT ONLY move one grid afar. The movement of board must be non-trivial enough(about length of one side of the cube) to guide the grid movement of tetris. And we set 60 frames as detection interval.
+
+                                    </p>
+
+
+                                    <p class="section-paragraph">
+                                        <h4>(3)Collision Detection</h4>
+                                        We set a maximum height for the piles accumulated on the bottom for each (Xgrid,Ygrid) coordinate. The tetris would fall for length of one side of the cube every 45 frames. When the height of tetris lowers down to the maximum height in terms of the  (Xgrid,Ygrid) coordinate it is currently at, it would be merged into the piles. And the next tetris would be generated on the board.
+
+
+                                    </p>
+
+                                    <p class="section-paragraph">
+                                        <h4>(4)Boarder Detection</h4>
+                                        <h5>Scenarios:  </h5>
+                                        <p> 1) When the tetris first appear on board, it needs to be within the border to be able to fall from the board; </p>
+                                        <p> 2) When the board manipulates the tetris to move in the air, it must be moved within the border; </p>
+                                        <p>3) When the board manipulates the tetris to do rotation, it needs to be always within the border. </p>    
+
+                                    </p>
+                                    <h5>Implementation: </h5>
+                                    <p>
+                                        We always tentatively assume the tetris could do the supposed movement(including rotation and translation) and then detect whether any part of tetris is laid beyond the border. If so, the tetris would maintain its last movement. Especially, when the tetris is rotating beyond the border during falling, we would update its self-rotation matrix in terms of the board coordinate and maintain its self-rotation matrix in terms of the bottom coordinate. 
+                                    </p>
+                                    <br/>
+                                    <p>
+
+                                    </p>
+                                </div>
+
+                            </div>
+                        </div>
+                    </section>                            <hr/>   
+                    <div class="container">
+
+                        <div class="row">
+
+                            <div class="col-lg-12">
+                                <h1 class="page-header">Thumbnail Gallery</h1>
+                            </div>
+
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/rotation1.png" alt="">
+                                </a>
+                                <h4>Rotation1</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/rotation2.png" alt="">
+                                </a>
+                                <h4>Rotation2</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/move1.png" alt="">
+                                </a>
+                                <h4>Move Left</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/move2.png" alt="">
+                                </a>
+                                <h4>Move Right</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/movefront.png" alt="">
+                                </a>
+                                <h4>Move Front</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/moveback.png" alt="">
+                                </a>
+
+                                <h4>Move Back</h4>
+                            </div>
+                        </div>
+                        <div class="media">
+                          <div class="media-left">
+                            <a href="#">
+                              <img class="media-object" src="https://www.youtube.com/watch?v=Icbgk8CSI10" alt="...">
+                          </a>
+                      </div>
+                      <div class="media-body">
+                        <h4 class="media-heading">Media heading</h4>
+                        ...
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <footer>
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <p>Copyright &copy; Your Website 2014</p>
+                            </div>
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- /.container -->
+                </footer>
+
+                <!-- jQuery -->
+                <script src="js/jquery.js"></script>
+
+                <!-- Bootstrap Core JavaScript -->
+                <script src="js/bootstrap.min.js"></script>
+
+            </body>
+
+            </html>
