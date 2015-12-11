@@ -90,7 +90,7 @@
                 <div class="row">
                     <div class="col-lg-12">
                         <h1 class="section-heading">Motivation and goals</h1>
-                        <p class="lead section-lead">What and why</p>
+                        <p class="lead section-lead">What and Why</p>
                         <p class="section-paragraph">Traditional 2D Tetris Game is an HCI-based application, with only two horizontal movement options (‘left’ and ‘right’) and four 90-degree rotation options. We created a 3D interface-based Tetris Game embedded on a marker in the real world. The main challenges for 3D Tetris Game design is that: 3D tetris is of 4 types of horizontal movements and up to 24 90-degree rotation gestures. We creatively imported Augmented Reality techniques here to increase interaction for users to ‘physically’ manipulate tetris gestures and positions. In our tetris game, the user could actually use a single board with special patterns to complete all these otherwise intricate controls if implemented using screen buttons. Our inspiration comes from the well-designed augmented reality project--<a href="https://www.dropbox.com/s/3f83y9dbpallwpi/isar2001-VOMAR-4.mov?dl=0">ARToolkit furniture interaction</a>.With the help of Vuforia SDK, we are able to finish feature detection and feature tracking and obtain transition modelview matrix between cameras and markers in the very first place.</p>
 
                         <p class="section-paragraph">Here is the list of our goals</p>
@@ -134,9 +134,12 @@
                                     <li class="list-group-item">
                                     Binhan works on implementing the control system, including using marker boards to drop, rotate and translate objects(start with teapot).
                                     </li>
-
-                                    After we finished all the above aspects, we do the integration. The most challenging part comes from how to adapt teapot manipulation system to tetris, which consists of multiple objects. 
-                                    Finally, we added extra interaction functions, such as allowing user to switch from the screen button manipulating mode to marker board manipulating mode.
+                                </p>
+                                <p>
+                                    After we finished all the above aspects, we do the integration. The most challenging part of integration comes from how to adapt teapot manipulation system to tetris, which consists of multiple objects. 
+                                    We come up with several strategies, but the only one working out is that we need to set a center for each tetris and record the offset of the center of each cube(consisting tetris) interms of the
+                                    pre-set center. When doing rendering, we first find the center position of tetris and then rotate the different cube around the center by the offset radius. In OpenGL, the order should be: translate to offset position->rotate around origin using updated rotation matrix->translate the origin to the 
+                                    updated center position.
                                 </p>
                             </p>
                             </div>
