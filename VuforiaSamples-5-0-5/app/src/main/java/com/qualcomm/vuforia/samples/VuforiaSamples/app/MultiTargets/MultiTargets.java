@@ -320,7 +320,7 @@ public class MultiTargets extends Activity implements SampleApplicationControl,
         
         Log.d(LOGTAG, "Beginning to check the tracking setup");
         
-        // Configuration data - identical to what is in the config.xml file
+        // Const data - identical to what is in the config.xml file
         //
         // If you want to recreate the trackable assets using the on-line TMS
         // server using the original images provided in the sample's media

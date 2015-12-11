@@ -3,13 +3,71 @@
     android:id="@+id/camera_overlay_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
+    <ProgressBar
+        style="@android:style/Widget.ProgressBar"
+        android:id="@+id/loading_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true" />
 
-        <ProgressBar
-            style="@android:style/Widget.ProgressBar"
-            android:id="@+id/loading_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true" />
-        
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="up"
+        android:id="@+id/up"
+        android:layout_above="@+id/left"
+        android:layout_toRightOf="@+id/left"
+        android:layout_toEndOf="@+id/left" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="down"
+        android:id="@+id/down"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/left"
+        android:layout_toLeftOf="@+id/right"
+        android:layout_toStartOf="@+id/right" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="left"
+        android:id="@+id/left"
+        android:layout_above="@+id/down"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="right"
+        android:id="@+id/right"
+        android:layout_above="@+id/down"
+        android:layout_toRightOf="@+id/up" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="In"
+        android:id="@+id/indicator"
+        android:layout_below="@+id/loading_indicator"
+        android:layout_alignLeft="@+id/loading_indicator"
+        android:layout_alignStart="@+id/loading_indicator" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Drop"
+        android:id="@+id/drop"
+        android:layout_below="@+id/right"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>

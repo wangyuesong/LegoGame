@@ -23,6 +23,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.Switch;
@@ -65,7 +66,9 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     private int mStartDatasetsIndex = 0;
     private int mDatasetsNumber = 0;
     private ArrayList<String> mDatasetStrings = new ArrayList<String>();
-    
+
+
+
     // Our OpenGL view:
     private SampleApplicationGLView mGlView;
     
@@ -118,10 +121,9 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         // Load any sample specific textures:
         mTextures = new Vector<Texture>();
         loadTextures();
-        
         mIsDroidDevice = android.os.Build.MODEL.toLowerCase().startsWith(
             "droid");
-        
+
     }
     
     // Process Single Tap event to trigger autofocus
@@ -167,12 +169,27 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
     
     private void loadTextures()
     {
-        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBrass.png",
+//        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBrass.png",
+//                getAssets()));
+//        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBlue.png",
+//                getAssets()));
+//        mTextures.add(Texture.loadTextureFromApk("TextureTeapotRed.png",
+//            getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("0.png",
                 getAssets()));
-        mTextures.add(Texture.loadTextureFromApk("TextureTeapotBlue.png",
+        mTextures.add(Texture.loadTextureFromApk("1.png",
                 getAssets()));
-        mTextures.add(Texture.loadTextureFromApk("TextureTeapotRed.png",
-            getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("2.png",
+                getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("3.png",
+                getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("4.png",
+                getAssets()));
+        mTextures.add(Texture.loadTextureFromApk("5.png",
+                getAssets()));
+
+        //
+
         mTextures.add(Texture.loadTextureFromApk("ImageTargets/Buildings.jpeg",
             getAssets()));
     }
@@ -291,11 +308,17 @@ public class ImageTargets extends Activity implements SampleApplicationControl,
         mGlView = new SampleApplicationGLView(this);
         mGlView.init(translucent, depthSize, stencilSize);
 
-        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS,6);
+        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 6);
         mRenderer = new ImageTargetRenderer(this, vuforiaAppSession);
         mRenderer.setTextures(mTextures);
         mGlView.setRenderer(mRenderer);
-        
+
+        ((Button)findViewById(R.id.down)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.up)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.left)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.right)).setOnClickListener(mRenderer);
+        ((Button)findViewById(R.id.drop)).setOnClickListener(mRenderer);
+
     }
     
     
