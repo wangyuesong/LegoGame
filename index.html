@@ -81,7 +81,7 @@
         <!-- Full Width Image Header with Logo -->
         <!-- Image backgrounds are set within the full-width-pics.css file. -->
         <header class="image-bg-fluid-height">
-            <img class="img-responsive img-center" src="http://placehold.it/200x200&text=Logo" alt="">
+            <img class="img-responsive img-center" src="" alt="">
         </header>
 
         <!-- Content Section -->
@@ -209,7 +209,7 @@
                                     the marker board to guide movement of tetris(detailed in the section below). We also add an alternative set of screen buttons to help with manipulation. 
                                 </p>
                                 
-                                <p>
+                                <p> 
                                     We also dealt with many other issues, such as sloping angle detection, border detection, which are stated in details in latter sections.
                                 </p>
                                 
@@ -226,19 +226,37 @@
                         <div class="col-lg-12">
                             <h1 class="section-heading">Technical Details</h1>
                             <p class="lead section-lead">Details about graphics and game control</p>
-                            
                             <p class="section-paragraph">
-                                <h4> 1. Coordinate System Orchestration </h5>
-                                    <p>
-                                        Vuforia SDK could provide us the modelview transition matrix between markers and 
-                                        cameras(using image tracking techniques). But we need the transition modelview matrix
-                                        between the marker board and the bottom. To do that, we simple multiply the inverse matrix of 
-                                        bottomModelViewMatrix with boardModelViewMatrix to obtain boardToBottomModelViewMatrix.
-                                        </p>             
-                                </p>
-                            
+                                 <div class="row">
+
+                            <div class="col-lg-12">
+                                <h1 class="page-header">1. Project Structure & OOP Design</h1>
+                            </div>
+
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/FileStructure.png" alt="">
+                                </a>
+                                <h4>FileSturecute</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/ImageTargetRenderer.png" alt="">
+                                </a>
+                                <h4>Main Logic Class</h4>
+                            </div>
+                             <div class="col-lg-3 col-md-4 col-xs-6 thumb">
+                                <a class="thumbnail" href="#">
+                                    <img class="img-responsive" src="image/Object3D.png" alt="">
+                                </a>
+                                <h4>Base Object Class</h4>
+                            </div>
+                           
+                        </div>
+                            </p>
                             <p class="section-paragraph">
-                                <h4> 2. Sloping Angle Detection </h5>
+
+                                <h4> 1. Sloping Angle Detection </h5>
                                     <ul class="list-group">
                                         <li class="list-group-item">1.Extract camera rotation matrix from modelview transition matrix(both board(‘chips’) and bottom(‘stones’))</li>
                                         <li class="list-group-item">2.Calculate quanterion of camera rotation matrix and derive euler angles</li>
@@ -250,7 +268,7 @@
 
 
                                 <p class="section-paragraph">
-                                    <h4> 3. Manipulate tetris movement using board</h5>
+                                    <h4> 2. Manipulate tetris movement using board</h5>
                                     <p></p>
                                     <br/>
                                         <h5><b>Rotation</b></h5>
@@ -267,17 +285,17 @@
 
 
                                     <p class="section-paragraph">
-                                        <h4> 4. Collision Detection</h4>
+                                        <h4> 3. Collision Detection</h4>
                                         We set a maximum height for the piles accumulated on the bottom for each (Xgrid,Ygrid) coordinate. The tetris would fall for length of one side of the cube every 45 frames. When the height of tetris lowers down to the maximum height in terms of the  (Xgrid,Ygrid) coordinate it is currently at, it would be merged into the piles. And the next tetris would be generated on the board.
 
 
                                     </p>
 
                                     <p class="section-paragraph">
-                                        <h4> 5. Border Detection</h4>
+                                        <h4> 4. Border Detection</h4>
                                         <h5>Scenarios:  </h5>
-                                        <p> a) When the tetris first appear on board, it needs to be within the border to be able to fall from the board. </p>
-                                        <p> b) When the board manipulates the tetris to move in the air, it must be moved within the border. </p>
+                                        <p> a) When the tetris first appear on board, it needs to be within the border to be able to fall from the board; </p>
+                                        <p> b) When the board manipulates the tetris to move in the air, it must be moved within the border; </p>
                                         <p> c) When the board manipulates the tetris to do rotation, it needs to be always within the border. </p>    
 
                                     </p>
@@ -349,6 +367,7 @@
 
                             <div class="col-lg-12">
                                 <h1 class="page-header">Demo</h1>
+                            </div>
                             <p>Click <a href="https://www.youtube.com/watch?v=Icbgk8CSI10">here</a> to enjoy your first AR tetris experience!</p>
                             </div>
                         </div>
