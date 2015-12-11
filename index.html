@@ -193,7 +193,7 @@
                                 </p>
                                 
                                 <p>
-                                    We also deal with many other issues, such as sloping angle detection, border detection, which are stated in details in latter sections.
+                                    We also dealt with many other issues, such as sloping angle detection, border detection, which are stated in details in latter sections.
                                 </p>
                                 
                             </p>
@@ -208,8 +208,7 @@
                     <div class="row">
                         <div class="col-lg-12">
                             <h1 class="section-heading">Technical Details</h1>
-                            <p class="lead section-lead">Details about game control and graphic</p>
-                            <h3>Control</h3>
+                            <p class="lead section-lead">Details about graphics and game control</p>
                             <p class="section-paragraph">
                                 <h4> (1)Sloping Angle Detection </h5>
                                     <ul class="list-group">
@@ -223,13 +222,16 @@
 
 
                                 <p class="section-paragraph">
-                                    <h4>(2)Manipulate tetris using board</h5>
-                                        <h5>Rotation:</h5>
-                                        <p> Scenarios: When the board appears, the tetris would rotate with the board synchronously.                                              When the board disappears, the tetris would fit into the closest 90-degree grid position.</p>                                                                                                                   <p>Implementation: when the board appears, render tetris within board coordinate(only rotate with board), but update the tetris 90-degree self-rotation matrix under bottom coordinates according to the current boardToBottomModelViewMatrix.  This could achieve continuous rotation on board and grid rotation when the board moves out of screen. Great visual effects! </p>
-
-                                        <h5>Move front/back/left/right   </h5>                                                                                        Implementation: when the board appears, the tetris would move synchronously with the board, BUT ONLY move one grid afar. The movement of board must be non-trivial enough(about length of one side of the cube) to guide the grid movement of tetris. And we set 60 frames as detection interval.
-
-                                    </p>
+                                    <h4>(2)Manipulate tetris movement using board</h5>
+                                        <h5><b>Rotation</b></h5>
+                                        <p> Scenarios: a) When the board appears, the tetris would rotate with the board synchronously.                             
+                                                       b) When the board disappears, the tetris would fit into the closest 90-degree grid position.
+                                                       c) When the tetris lands on piles, it need to rotate into a 90-degree pose to fit into grid settings.</p>                    
+                                        <p>Implementation: when the board appears, render tetris within board coordinate(only rotate with board), but update the tetris 90-degree self-rotation matrix under bottom coordinates according to the current boardToBottomModelViewMatrix.  This could achieve continuous rotation on board and grid rotation when the board moves out of screen. Great visual effects! </p>
+                                        
+                                        <h5><b>Move front/back/left/right</b>   </h5>  
+                                        <p>Implementation: when the board appears, the tetris would move synchronously with the board, BUT ONLY move one grid afar. The movement of board must be non-trivial enough(about length of one side of the cube) to guide the grid movement of tetris. And we set 60 frames as detection interval.</p>
+                                </p>
 
 
                                     <p class="section-paragraph">
